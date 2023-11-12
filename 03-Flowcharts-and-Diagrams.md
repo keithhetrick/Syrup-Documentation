@@ -8,6 +8,9 @@
 
 This diagram showcases the signal chain from audio input to output in the "Syrup" audio plugin. It illustrates the routing and manipulation of the audio signal through various effects.
 
+![Syrup Signal Flow As A Modular Directed Graph Data Structure](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/22f03296-e05a-4ebc-86fb-d56902ff675c">
+)
+
 ![Syrup Signal Flow Diagram](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/5c00e627-b39e-43d7-b759-f4984c15cd37)
 
 ### GUI Template Diagram
