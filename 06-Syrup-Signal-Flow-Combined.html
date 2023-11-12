@@ -55,13 +55,6 @@
           pid: "Host",
         },
         {
-          id: "AI Processing Host",
-          label: "AI Processing Host",
-          level: 2,
-          color: "red",
-          pid: "Host",
-        },
-        {
           id: "Output Host",
           label: "Output Host",
           level: 2,
@@ -70,19 +63,26 @@
         },
 
         {
-          id: "AI Processing",
-          label: "AI Processing",
-          level: 3,
-          color: "orange",
-          pid: "AI Processing Host",
-        },
-
-        {
           id: "Signal Bridge",
           label: "Signal Bridge",
           level: 3,
           color: "orange",
           pid: "Input Host" && "Output Host",
+        },
+
+        {
+          id: "AI Processing Host",
+          label: "AI Processing Host",
+          level: 4,
+          color: "red",
+          pid: "Host",
+        },
+        {
+          id: "AI Processing",
+          label: "AI Processing",
+          level: 5,
+          color: "orange",
+          pid: "AI Processing Host",
         },
 
         {
@@ -388,7 +388,6 @@
         { from: "Audio Input", to: "Host" },
         { from: "Host", to: "Input Host" },
         { from: "Host", to: "Output Host" },
-        { from: "Host", to: "AI Processing Host" },
 
         { from: "Input Host", to: "Signal Bridge" },
         { from: "Signal Bridge", to: "AI Processing Host" },
