@@ -4,9 +4,9 @@
 
 "Syrup" is a versatile audio effects plugin designed for music production and sound design, combining traditional effects with innovative AI-driven and vocal harmony features.
 
-![Syrup Audio Plugin Screenshot](https://file%252B.vscode-resource.vscode-cdn.net/Users/keithhetrick/Desktop/misc/Syrup-Documentation/Syup-Main.png?version%253D1699894967954)
+![Syrup Audio Plugin Screenshot](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/9bd94a2f-c4be-4d8c-90b3-b0a5cb11513f)
 
-The plugin is being developed by [Syrup Audio](https://syrupaudio.com/), a Nashville-based audio software company, and will be released as a VST3 plugin for Windows and macOS. The plugin is being developed using the [JUCE](https://juce.com/) framework.
+The plugin is being developed by Syrup Audio, a Nashville-based audio software company, and will be released as a VST3 plugin for Windows and macOS. The plugin is being developed using the [JUCE](https://juce.com/) framework.
 
 The plugin is being fronted by [Keith Hetrick](https://en.wikipedia.org/wiki/Keith_Hetrick), a software engineer and Grammy-Nominated songwriter/musician/producer based in the Nashville Metropolitan area.
 
