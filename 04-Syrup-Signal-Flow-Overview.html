@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Syrup Audio Plugin - Signal Flow Overview</title>
-    <meta charset="utf-8" />
+    <title>Modular Signal Flow Overview</title>
+    <h1
+      style="
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 40px;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 10px;
+      "
+    >
+      "Syrup" Audio Plugin - Modular Signal Flow Overview
+    </h1>
 
-    <h1>Syrup Audio Plugin Signal Flow</h1>
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
 
+    <style type="text/css">
+      .vis-network {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 2px solid lightgray;
+      }
+      .vis-network::before {
+        content: "Modular Signal Flow"; /* <---- Make this an image */
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 4px;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .vis-network::after {
+        content: "Solid Line = Input Signal Flow, Dotted Line = Output Signal Flow";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        padding: 4px;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .vis-network::before,
+      .vis-network::after {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 12px;
+        border-radius: 4px;
+      }
+    </style>
+
+    <!-- import vis.js -->
     <script
       type="text/javascript"
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
     <style type="text/css">
       #mynetwork {
-        width: 800px;
-        height: 600px;
+        width: 1200px;
+        height: 1000px;
         border: 1px solid lightgray;
       }
     </style>
@@ -22,49 +71,966 @@
     <div id="mynetwork"></div>
 
     <script type="text/javascript">
-      // Nodes array with updated colors
+      // Create nodes and edges for the graph with hierarchical relationships
       var nodes = new vis.DataSet([
-        { id: 1, label: "Audio Input", color: "lightgreen" },
-        { id: 2, label: "Reverb (Module)" },
-        { id: 3, label: "Delay (Module)" },
-        { id: 4, label: "Saturation (Module)" },
-        { id: 5, label: "Pitch Shifter (Module)" },
-        { id: 6, label: "AI Processing", color: "lightyellow" },
-        { id: 7, label: "Master Control (Randomizer)", color: "orange" },
-        { id: 8, label: "Audio Output", color: "lightgreen" },
+        { id: "Audio Input", label: "Audio Input", level: 0 },
+
+        {
+          id: "Signal Manager",
+          label: "Signal Manager",
+          level: 1,
+          color: "orange",
+          pid: "Audio Input",
+        },
+
+        {
+          id: "Signal Input",
+          label: "Signal Input",
+          level: 2,
+          color: "lightgreen",
+          pid: "Signal Manager",
+        },
+        {
+          id: "Signal Output",
+          label: "Signal Output",
+          level: 2,
+          color: "lightgreen",
+          pid: "Signal Manager",
+        },
+
+        {
+          id: "Signal Bridge",
+          label: "Signal Bridge",
+          level: 3,
+          color: "orange",
+          pid: "Signal Input" && "Signal Output",
+        },
+
+        {
+          id: "Signal Bridge Input",
+          label: "Signal Bridge Input",
+          level: 4,
+          color: "lightgreen",
+          pid: "Signal Bridge",
+        },
+        {
+          id: "Signal Bridge Output",
+          label: "Signal Bridge Output",
+          level: 4,
+          color: "lightgreen",
+          pid: "Signal Bridge",
+        },
+
+        {
+          id: "AI Processing Host",
+          label: "AI Processing Host",
+          level: 5,
+          color: "lightgrey",
+          pid: "Host",
+        },
+
+        {
+          id: "AI Processing Input",
+          label: "AI Processing Input",
+          level: 6,
+          color: "lightgreen",
+          pid: "AI Processing Host",
+        },
+        {
+          id: "AI Processing Output",
+          label: "AI Processing Output",
+          level: 6,
+          color: "lightgreen",
+          pid: "AI Processing Host",
+        },
+
+        {
+          id: "AI Processing",
+          label: "AI Processing",
+          level: 7,
+          color: "red",
+          pid: "AI Processing Input" || "AI Processing Output",
+        },
+
+        {
+          id: "Effects Signal Manager",
+          label: "Effects Signal Manager",
+          level: 5,
+          color: "orange",
+          pid: "Host",
+        },
+
+        {
+          id: "Effects Signal Manager Input",
+          label: "Effects Signal Manager Input",
+          level: 8,
+          color: "lightgreen",
+          pid: "ffects Signal Manager",
+        },
+        {
+          id: "Effects Signal Manager Output",
+          label: "Effects Signal Manager Output",
+          level: 8,
+          color: "lightgreen",
+          pid: "Effects Signal Manager",
+        },
+
+        {
+          id: "Single Effects Host",
+          label: "Single Effects Host",
+          level: 9,
+          color: "lightgrey",
+          pid:
+            "Effects Signal Manager Input" && "Effects Signal Manager Output",
+        },
+
+        {
+          id: "Single Effects Input",
+          label: "Single Effects Input",
+          level: 10,
+          color: "lightgreen",
+          pid: "Single Effects Host",
+        },
+        {
+          id: "Single Effects Output",
+          label: "Single Effects Output",
+          level: 10,
+          color: "lightgreen",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Reverb",
+          label: "Reverb",
+          level: 11,
+          color: "red",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Reverb Input",
+          label: "Reverb Input",
+          level: 12,
+          color: "lightgreen",
+          pid: "Reverb",
+        },
+        {
+          id: "Reverb Output",
+          label: "Reverb Output",
+          level: 12,
+          color: "lightgreen",
+          pid: "Reverb",
+        },
+
+        {
+          id: "Reverb Signal Host",
+          label: "Reverb Signal Host",
+          level: 13,
+          color: "lightgrey",
+          pid: "Reverb Input" && "Reverb Output",
+        },
+
+        {
+          id: "Reverb Signal Host Input",
+          label: "Reverb Signal Host Input",
+          level: 14,
+          color: "lightgreen",
+          pid: "Reverb Signal Host",
+        },
+        {
+          id: "Reverb Signal Host Output",
+          label: "Reverb Signal Host Output",
+          level: 14,
+          color: "lightgreen",
+          pid: "Reverb Signal Host",
+        },
+
+        {
+          id: "Reverb Parameter Control",
+          label: "Reverb Parameter Control",
+          level: 15,
+          color: "lightblue",
+          pid: "Reverb Signal Host Input" || "Reverb Signal Host Output",
+        },
+        {
+          id: "Reverb Processing",
+          label: "Reverb Processing",
+          level: 15,
+          color: "lightblue",
+          pid: "Reverb Signal Host Input" || "Reverb Signal Host Output",
+        },
+        {
+          id: "Reverb Wet/Dry Mix",
+          label: "Reverb Wet/Dry Mix",
+          level: 15,
+          color: "lightblue",
+          pid: "Reverb Signal Host Input" || "Reverb Signal Host Output",
+        },
+
+        {
+          id: "Delay",
+          label: "Delay",
+          level: 11,
+          color: "red",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Delay Input",
+          label: "Delay Input",
+          level: 12,
+          color: "lightgreen",
+          pid: "Delay",
+        },
+        {
+          id: "Delay Output",
+          label: "Delay Output",
+          level: 12,
+          color: "lightgreen",
+          pid: "Delay",
+        },
+
+        {
+          id: "Delay Signal Host",
+          label: "Delay Signal Host",
+          level: 13,
+          color: "lightgrey",
+          pid: "Delay Input" && "Delay Output",
+        },
+
+        {
+          id: "Delay Signal Host Input",
+          label: "Delay Signal Host Input",
+          level: 14,
+          color: "lightgreen",
+          pid: "Delay Signal Host",
+        },
+        {
+          id: "Delay Signal Host Output",
+          label: "Delay Signal Host Output",
+          level: 14,
+          color: "lightgreen",
+          pid: "Delay Signal Host",
+        },
+
+        {
+          id: "Delay Parameter Control",
+          label: "Delay Parameter Control",
+          level: 15,
+          color: "lightblue",
+          pid: "Delay Signal Host",
+        },
+        {
+          id: "Delay Processing",
+          label: "Delay Processing",
+          level: 15,
+          color: "lightblue",
+          pid: "Delay Signal Host",
+        },
+        {
+          id: "Delay Wet/Dry Mix",
+          label: "Delay Wet/Dry Mix",
+          level: 15,
+          color: "lightblue",
+          pid: "Delay Signal Host",
+        },
+
+        {
+          id: "Saturation",
+          label: "Saturation",
+          level: 11,
+          color: "red",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Saturation Input",
+          label: "Saturation Input",
+          level: 12,
+          color: "lightgreen",
+          pid: "Saturation",
+        },
+        {
+          id: "Saturation Output",
+          label: "Saturation Output",
+          level: 12,
+          color: "lightgreen",
+          pid: "Saturation",
+        },
+
+        {
+          id: "Saturation Signal Host",
+          label: "Saturation Signal Host",
+          level: 13,
+          color: "lightgrey",
+          pid: "Saturation Input" && "Saturation Output",
+        },
+
+        {
+          id: "Saturation Signal Host Input",
+          label: "Saturation Signal Host Input",
+          level: 14,
+          color: "lightgreen",
+          pid: "Saturation Signal Host",
+        },
+        {
+          id: "Saturation Signal Host Output",
+          label: "Saturation Signal Host Output",
+          level: 14,
+          color: "lightgreen",
+          pid: "Saturation Signal Host",
+        },
+
+        {
+          id: "Saturation Parameter Control",
+          label: "Saturation Parameter Control",
+          level: 15,
+          color: "lightblue",
+          pid: "Saturation Signal Host",
+        },
+        {
+          id: "Saturation Processing",
+          label: "Saturation Processing",
+          level: 15,
+          color: "lightblue",
+          pid: "Saturation Signal Host",
+        },
+        {
+          id: "Saturation Wet/Dry Mix",
+          label: "Saturation Wet/Dry Mix",
+          level: 15,
+          color: "lightblue",
+          pid: "Saturation Signal Host",
+        },
+
+        {
+          id: "Pitch Shifter",
+          label: "Pitch Shifter",
+          level: 11,
+          color: "red",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Pitch Shifter Input",
+          label: "Pitch Shifter Input",
+          level: 12,
+          color: "lightgreen",
+          pid: "Pitch Shifter",
+        },
+        {
+          id: "Pitch Shifter Output",
+          label: "Pitch Shifter Output",
+          level: 12,
+          color: "lightgreen",
+          pid: "Pitch Shifter",
+        },
+
+        {
+          id: "Pitch Shifter Signal Host",
+          label: "Pitch Shifter Signal Host",
+          level: 13,
+          color: "lightgrey",
+          pid: "Pitch Shifter Input" && "Pitch Shifter Output",
+        },
+
+        {
+          id: "Pitch Shifter Signal Host Input",
+          label: "Pitch Shifter Signal Host Input",
+          level: 14,
+          color: "lightgreen",
+          pid: "Pitch Shifter Signal Host",
+        },
+        {
+          id: "Pitch Shifter Signal Host Output",
+          label: "Pitch Shifter Signal Host Output",
+          level: 14,
+          color: "lightgreen",
+          pid: "Pitch Shifter Signal Host",
+        },
+
+        {
+          id: "Pitch Shifter Parameter Control",
+          label: "Pitch Shifter Parameter Control",
+          level: 15,
+          color: "lightblue",
+          pid: "Pitch Shifter Input",
+        },
+        {
+          id: "Pitch Shifter Processing",
+          label: "Pitch Shifter Processing",
+          level: 15,
+          color: "lightblue",
+          pid: "Pitch Shifter Input",
+        },
+        {
+          id: "Pitch Shifter Wet/Dry Mix",
+          label: "Pitch Shifter Wet/Dry Mix",
+          level: 15,
+          color: "lightblue",
+          pid: "Pitch Shifter Input",
+        },
+
+        {
+          id: "Master Control",
+          label: "Master Control",
+          level: 9,
+          color: "red",
+          pid: "Single Effects Host",
+        },
+
+        {
+          id: "Master Control Input",
+          label: "Master Control Input",
+          level: 10,
+          color: "lightgreen",
+          pid: "Master Control",
+        },
+        {
+          id: "Master Control Output",
+          label: "Master Control Output",
+          level: 10,
+          color: "lightgreen",
+          pid: "Master Control",
+        },
+
+        {
+          id: "Master Control Signal Host",
+          label: "Master Control Signal Host",
+          level: 11,
+          color: "lightgrey",
+          pid: "Master Control Input" && "Master Control Output",
+        },
+
+        {
+          id: "Master Control Signal Input",
+          label: "Master Control Signal Input",
+          level: 12,
+          color: "lightgreen",
+          pid: "Master Control Signal Host",
+        },
+        {
+          id: "Master Control Signal Output",
+          label: "Master Control Signal Output",
+          level: 12,
+          color: "lightgreen",
+          pid: "Master Control Signal Host",
+        },
+
+        {
+          id: "Master Control Parameter Control",
+          label: "Master Control Parameter Control",
+          level: 13,
+          color: "lightcoral",
+          pid: "Master Control Signal Input" || "Master Control Signal Output",
+        },
+        {
+          id: "Master Control Processing",
+          label: "Master Control Processing",
+          level: 13,
+          color: "lightcoral",
+          pid: "Master Control Signal Input" || "Master Control Signal Output",
+        },
+        {
+          id: "Master Control Wet/Dry Mix",
+          label: "Master Control Wet/Dry Mix",
+          level: 13,
+          color: "lightcoral",
+          pid: "Master Control Signal Input" || "Master Control Signal Output",
+        },
+
+        { id: "Output Main", label: "Output Main", level: 2 },
+
+        { id: "Audio Output", label: "Audio Output", level: 3 },
       ]);
 
-      // Edges array
       var edges = new vis.DataSet([
-        { from: 1, to: 2 },
-        { from: 1, to: 3 },
-        { from: 1, to: 4 },
-        { from: 1, to: 5 },
-        { from: 2, to: 6 },
-        { from: 3, to: 6 },
-        { from: 4, to: 6 },
-        { from: 5, to: 6 },
-        { from: 6, to: 7 },
-        { from: 7, to: 8 },
-        { from: 7, to: 2, dashes: true, color: { color: "red" } },
-        { from: 7, to: 3, dashes: true, color: { color: "red" } },
-        { from: 7, to: 4, dashes: true, color: { color: "red" } },
-        { from: 7, to: 5, dashes: true, color: { color: "red" } },
+        { from: "Audio Input", to: "Signal Manager" },
+
+        { from: "Signal Manager", to: "Signal Input" },
+        { from: "Signal Output", dashes: true, to: "Signal Manager" },
+
+        { from: "Signal Input", to: "Signal Bridge" },
+        { from: "Signal Bridge", to: "Signal Bridge Input" },
+        { from: "Signal Bridge", dashes: true, to: "Signal Output" },
+        { from: "Signal Bridge Output", dashes: true, to: "Signal Bridge" },
+
+        { from: "Signal Bridge", to: "Signal Bridge Input" },
+        { from: "Signal Bridge Input", to: "Effects Signal Manager " },
+        { from: "Signal Bridge Input", to: "AI Processing Host" },
+        {
+          from: "AI Processing Host",
+          dashes: true,
+          to: "Signal Bridge Output",
+        },
+
+        { from: "AI Processing", dashes: true, to: "AI Processing Output" },
+        { from: "AI Processing", to: "AI Processing Input" },
+
+        {
+          from: "AI Processing Output",
+          dashes: true,
+          to: "AI Processing Host",
+        },
+        {
+          from: "AI Processing Host",
+          to: "AI Processing Input",
+        },
+
+        {
+          from: "Effects Signal Manager",
+          to: "Effects Signal Manager Input",
+        },
+        {
+          from: "Effects Signal Manager",
+          dashes: true,
+          to: "Signal Bridge Output",
+        },
+
+        {
+          from: "Single Effects Host",
+          dashes: true,
+          to: "Effects Signal Manager Output",
+        },
+
+        {
+          from: "Effects Signal Manager Input",
+          to: "Single Effects Host",
+        },
+        {
+          from: "Effects Signal Manager Output",
+          dashes: true,
+          to: "Effects Signal Manager",
+        },
+
+        { from: "Effects Signal Manager Input", to: "Master Control" },
+        {
+          from: "Master Control",
+          dashes: true,
+          to: "Effects Signal Manager Output",
+        },
+        {
+          from: "Single Effects Host",
+          to: "Single Effects Input",
+        },
+        {
+          from: "Single Effects Output",
+          dashes: true,
+          to: "Single Effects Host",
+        },
+        { from: "Single Effects Input", to: "Reverb" },
+        { from: "Single Effects Input", to: "Delay" },
+        { from: "Single Effects Input", to: "Saturation" },
+        { from: "Single Effects Input", to: "Pitch Shifter" },
+
+        { from: "Reverb", to: "Reverb Input" },
+        { from: "Reverb Input", to: "Reverb Signal Host" },
+        {
+          from: "Reverb Signal Host",
+          to: "Reverb Signal Host Input",
+        },
+        {
+          from: "Reverb Signal Host Output",
+          dashes: true,
+          to: "Reverb Signal Host",
+        },
+        { from: "Reverb Signal Host Input", to: "Reverb Parameter Control" },
+        { from: "Reverb Signal Host Input", to: "Reverb Processing" },
+        { from: "Reverb Signal Host Input", to: "Reverb Wet/Dry Mix" },
+        {
+          from: "Reverb Parameter Control",
+          dashes: true,
+          to: "Reverb Signal Host Output",
+        },
+
+        {
+          from: "Reverb Parameter Control",
+          to: "Reverb Processing",
+        },
+
+        {
+          from: "Reverb Processing",
+          dashes: true,
+          to: "Reverb Signal Host Output",
+        },
+
+        {
+          from: "Reverb Processing",
+          to: "Reverb Wet/Dry Mix",
+        },
+
+        {
+          from: "Reverb Wet/Dry Mix",
+          dashes: true,
+          to: "Reverb Signal Host Output",
+        },
+        { from: "Reverb Signal Host", dashes: true, to: "Reverb Output" },
+        { from: "Reverb Output", dashes: true, to: "Reverb" },
+        { from: "Reverb", dashes: true, to: "Single Effects Output" },
+
+        { from: "Delay", to: "Delay Input" },
+        { from: "Delay Input", to: "Delay Signal Host" },
+        { from: "Delay Signal Host", to: "Delay Signal Host Input" },
+        {
+          from: "Delay Signal Host Input",
+          to: "Delay Parameter Control",
+        },
+        {
+          from: "Delay Signal Host Input",
+          to: "Delay Processing",
+        },
+        {
+          to: "Delay Signal Host Input",
+          from: "Delay Wet/Dry Mix",
+        },
+        {
+          from: "Delay Parameter Control",
+          dashes: true,
+          to: "Delay Signal Host Output",
+        },
+        {
+          from: "Delay Processing",
+          dashes: true,
+          to: "Delay Signal Host Output",
+        },
+        {
+          from: "Delay Signal Host Output",
+          dashes: true,
+          to: "Delay Signal Host",
+        },
+        {
+          from: "Delay Wet/Dry Mix",
+          dashes: true,
+          to: "Delay Signal Host Output",
+        },
+        { from: "Delay Signal Host", dashes: true, to: "Delay Output" },
+        { from: "Delay Output", dashes: true, to: "Delay" },
+        { from: "Delay", dashes: true, to: "Single Effects Output" },
+
+        { from: "Saturation", to: "Saturation Input" },
+        { from: "Saturation Input", to: "Saturation Signal Host" },
+        {
+          from: "Saturation Signal Host",
+          to: "Saturation Signal Host Input",
+        },
+
+        {
+          from: "Saturation Signal Host Input",
+          to: "Saturation Parameter Control",
+        },
+        {
+          from: "Saturation Signal Host Input",
+          to: "Saturation Processing",
+        },
+        {
+          from: "Saturation Signal Host Input",
+          to: "Saturation Wet/Dry Mix",
+        },
+
+        {
+          from: "Saturation Parameter Control",
+          dashes: true,
+          to: "Saturation Signal Host Output",
+        },
+        {
+          from: "Saturation Processing",
+          dashes: true,
+          to: "Saturation Signal Host Output",
+        },
+        {
+          from: "Saturation Wet/Dry Mix",
+          dashes: true,
+          to: "Saturation Signal Host Output",
+        },
+        {
+          from: "Saturation Signal Host Output",
+          dashes: true,
+          to: "Saturation Signal Host",
+        },
+        {
+          from: "Saturation Signal Host",
+          dashes: true,
+          to: "Saturation Output",
+        },
+        { from: "Saturation Output", dashes: true, to: "Saturation" },
+        { from: "Saturation", dashes: true, to: "Single Effects Output" },
+
+        { from: "Pitch Shifter", to: "Pitch Shifter Input" },
+        { from: "Pitch Shifter Input", to: "Pitch Shifter Signal Host" },
+        {
+          from: "Pitch Shifter Signal",
+          dashes: true,
+          to: "Pitch Shifter Output",
+        },
+        {
+          from: "Pitch Shifter Signal Host",
+          to: "Pitch Shifter Signal Host Input",
+        },
+        {
+          from: "Pitch Shifter Signal Host Input",
+          to: "Pitch Shifter Parameter Control",
+        },
+        {
+          from: "Pitch Shifter Signal Host Input",
+          to: "Pitch Shifter Processing",
+        },
+        {
+          from: "Pitch Shifter Signal Host Input",
+          to: "Pitch Shifter Wet/Dry Mix",
+        },
+        {
+          from: "Pitch Shifter Parameter Control",
+          dashes: true,
+          to: "Pitch Shifter Signal Host Output",
+        },
+        {
+          from: "Pitch Shifter Processing",
+          dashes: true,
+          to: "Pitch Shifter Signal Host Output",
+        },
+        {
+          from: "Pitch Shifter Wet/Dry Mix",
+          dashes: true,
+          to: "Pitch Shifter Signal Host Output",
+        },
+        {
+          from: "Pitch Shifter Signal Host Output",
+          dashes: true,
+          to: "Pitch Shifter Signal Host",
+        },
+
+        {
+          from: "Pitch Shifter Signal Host",
+          dashes: true,
+          to: "Pitch Shifter Output",
+        },
+        {
+          from: "Pitch Shifter Output",
+          dashes: true,
+          to: "Pitch Shifter",
+        },
+        { from: "Pitch Shifter", dashes: true, to: "Single Effects Output" },
+
+        { from: "Master Control", to: "Master Control Input" },
+        { from: "Master Control Output", dashes: true, to: "Master Control" },
+        { from: "Master Control Input", to: "Master Control Signal Host" },
+
+        {
+          from: "Master Control Signal Host",
+          to: "Master Control Signal Input",
+        },
+        {
+          from: "Master Control Signal Input",
+          to: "Master Control Parameter Control",
+        },
+        {
+          from: "Master Control Signal Input",
+          to: "Master Control Processing",
+        },
+        {
+          from: "Master Control Signal Input",
+          to: "Master Control Wet/Dry Mix",
+        },
+        {
+          from: "Master Control Parameter Control",
+          dashes: true,
+          to: "Master Control Signal Output",
+        },
+        {
+          from: "Master Control Processing",
+          dashes: true,
+          to: "Master Control Signal Output",
+        },
+        {
+          from: "Master Control Wet/Dry Mix",
+          dashes: true,
+          to: "Master Control Signal Output",
+        },
+        {
+          from: "Master Control Signal Output",
+          dashes: true,
+          to: "Master Control Signal Host",
+        },
+        {
+          from: "Master Control Signal Host",
+          dashes: true,
+          to: "Master Control Output",
+        },
+
+        { from: "Signal Manager", dashes: true, to: "Output Main" },
+        { from: "Output Main", dashes: true, to: "Audio Output" },
       ]);
 
-      // Network configuration
+      // Configuration for the network graph - make each node a rectangle & put on boundaries so that each node won't overlap
       var container = document.getElementById("mynetwork");
       var data = {
         nodes: nodes,
         edges: edges,
       };
       var options = {
+        layout: {
+          hierarchical: {
+            direction: "UD",
+            sortMethod: "directed",
+            levelSeparation: 150,
+            nodeSpacing: 450,
+            treeSpacing: 200,
+          },
+        },
+        nodes: {
+          shape: "box",
+          margin: 10,
+          widthConstraint: {
+            maximum: 200,
+          },
+          font: {
+            size: 25,
+          },
+        },
         edges: {
-          arrows: "to",
+          smooth: true,
+          arrows: {
+            to: { enabled: true, scaleFactor: 1, type: "arrow" },
+            middle: { enabled: false, scaleFactor: 1, type: "arrow" },
+            from: { enabled: false, scaleFactor: 1, type: "arrow" },
+          },
+        },
+        physics: {
+          enabled: true,
+          hierarchicalRepulsion: {
+            nodeDistance: 180,
+          },
+          solver: "hierarchicalRepulsion",
         },
       };
 
-      // Initialize network
+      /*
+      var data = {
+        nodes: nodes,
+        edges: edges,
+      };
+      var options = {
+        layout: {
+          hierarchical: {
+            direction: "UD",
+            sortMethod: "directed",
+            shakeTowards: "roots",
+            nodeSpacing: 100,
+            levelSeparation: 100,
+            treeSpacing: 100,
+          },
+        },
+        nodes: {
+          shape: "box",
+          margin: 10,
+          widthConstraint: 100,
+          heightConstraint: 100,
+          borderWidth: 1,
+          borderWidthSelected: 3,
+          color: {
+            border: "black",
+            background: "lightgray",
+            highlight: {
+              border: "black",
+              background: "lightgray",
+            },
+            hover: {
+              border: "black",
+              background: "lightgray",
+            },
+          },
+          font: {
+            color: "black",
+            size: 14, // px
+            face: "arial",
+            background: "none",
+            strokeWidth: 0, // px
+            strokeColor: "#ffffff",
+            align: "center",
+            vadjust: 0,
+            multi: false,
+            bold: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "bold",
+            },
+            ital: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "italic",
+            },
+            boldital: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "bold italic",
+            },
+            mono: {
+              color: "black",
+              size: 15, // px
+              face: "arial",
+              vadjust: 2,
+              mod: "",
+            },
+          },
+        },
+        edges: {
+          color: {
+            color: "black",
+            highlight: "black",
+            hover: "black",
+            inherit: "from",
+            opacity: 1.0,
+          },
+          font: {
+            color: "black",
+            size: 14, // px
+            face: "arial",
+            background: "none",
+            strokeWidth: 0, // px
+            strokeColor: "#ffffff",
+            align: "center",
+            vadjust: 0,
+            multi: false,
+            bold: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "bold",
+            },
+            ital: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "italic",
+            },
+            boldital: {
+              color: "black",
+              size: 14, // px
+              face: "arial",
+              vadjust: 0,
+              mod: "bold italic",
+            },
+            mono: {
+              color: "black",
+              size: 15, // px
+              face: "arial",
+              vadjust: 2,
+              mod: "",
+            },
+          },
+        },
+      };
+      */
+
+      // Initialize the network
       var network = new vis.Network(container, data, options);
     </script>
   </body>
