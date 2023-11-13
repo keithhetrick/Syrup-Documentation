@@ -6,7 +6,7 @@ const nodeStyles = {
   host: { color: "#00ffff" },
   process: { color: "#ff0000" },
   control: { color: "#ff00ff" },
-  audio: { color: "#8000ff", font: "#ffffff" },
+  audio: { color: "#8000ff" },
 };
 
 // Function to create a node with common properties and parent-child relationship
@@ -23,7 +23,7 @@ function createNode(id, label, level, styleCategory, pid = null) {
 // Nodes array
 export const nodes = [
   /* AUDIO INPUT NODES */
-  createNode("AUDIO INPUT", "AUDIO INPUT", 0, "audio"),
+  createNode("AUDIO INPUT", "AUDIO INPUT", 0, "audio"), // <-- Root node
 
   /* SIGNAL MANAGER NODES */
   createNode("SIGNAL MANAGER", "SIGNAL MANAGER", 1, "manager", "AUDIO INPUT"),
@@ -545,5 +545,5 @@ export const edges = [
 
   /* OUTPUT MAIN EDGES */
   { from: "SIGNAL MANAGER", dashes: true, to: "Output Main" },
-  { from: "Output Main", dashes: true, to: "AUDIO OUTPUT" },
+  { from: "Output Main", dashes: true, to: "AUDIO OUTPUT" }, // <-- Last node
 ];

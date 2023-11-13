@@ -22,6 +22,7 @@ var options = {
     zoomView: true, // do not allow zooming
     selectable: true, // do not allow selection
     hover: true, // do not allow hovering
+    hoverConnectedEdges: true, // do highlight connected edges when hovering a node
     navigationButtons: true, // do not show navigation buttons
     keyboard: true, // do not allow using the keyboard
     multiselect: false, // do not allow multiselect
@@ -32,13 +33,17 @@ var options = {
     solver: "hierarchicalRepulsion",
   },
   nodes: {
-    shape: "box",
-    margin: 10,
+    shape: "dot",
+    size: 21,
     widthConstraint: { maximum: 200 },
-    font: { size: 25 },
+    font: {
+      size: 24,
+      color: "#000000",
+    },
   },
   edges: {
     smooth: true,
+    width: 2,
     arrows: { to: { enabled: true, scaleFactor: 1, type: "arrow" } },
   },
   physics: {
@@ -56,7 +61,7 @@ var network = new vis.Network(
   options
 );
 
-// Add event listener to the network
+// Function that highlights the path of a selected node
 network.on("selectNode", function (params) {
   var selectedNodeId = params.nodes[0];
   var selectedNode = nodes.find((node) => node.id === selectedNodeId);
