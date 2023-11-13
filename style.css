@@ -1,16 +1,21 @@
+/* put everything in the cencter */
+
+* {
+  margin: auto;
+}
+
 #main-title {
   font-family: "Courier New", Courier, monospace;
-  font-size: 40px;
   color: white;
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
 }
 
 .vis-network {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 95vw;
+  height: 95vh;
   border: 2px solid lightgray;
 }
 
@@ -41,7 +46,7 @@
 }
 
 #mynetwork {
-  width: 1200px;
-  height: 1000px;
+  width: 85vw;
+  height: 70vh;
   border: 1px solid lightgray;
 }
