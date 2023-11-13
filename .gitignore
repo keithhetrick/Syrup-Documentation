@@ -1,2 +1,4 @@
+# hide assets folder
+assets/*
 assets/*.png
 .DS_Store
