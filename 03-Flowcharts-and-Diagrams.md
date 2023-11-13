@@ -8,9 +8,7 @@
 
 This diagram showcases the signal chain from audio input to output in the "Syrup" audio plugin. It illustrates the routing and manipulation of the audio signal through various effects.
 
-![Screen Shot 2023-11-12 at 3 07 50 PM](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/3d9d13e6-4cff-40bb-8b1d-c88d2c3a987c){width="1211"}
-
-![Screen Shot 2023-11-12 at 3 07 50 PM](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/22f03296-e05a-4ebc-86fb-d56902ff675c){width="1211"}
+![Screen Shot 2023-11-12 at 3 07 50 PM](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/3d9d13e6-4cff-40bb-8b1d-c88d2c3a987c)
 
 ![Syrup Signal Flow Diagram](https://github.com/keithhetrick/Syrup-Documentation/assets/104343338/5c00e627-b39e-43d7-b759-f4984c15cd37)
 
