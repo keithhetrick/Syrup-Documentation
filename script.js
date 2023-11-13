@@ -1,7 +1,7 @@
 import { nodes, edges } from "./data.js";
 
 // Configuration for the network graph
-var options = {
+const options = {
   layout: {
     improvedLayout: true,
     hierarchical: {
@@ -16,16 +16,27 @@ var options = {
       sortMethod: "directed",
     },
   },
+  // put a limit on how much to zoom in & out
   interaction: {
     dragNodes: true, // do not allow dragging nodes
     dragView: true, // do not allow dragging the view
     zoomView: true, // do not allow zooming
+    zoomSpeed: 0.25, // do not allow zooming
     selectable: true, // do not allow selection
     hover: true, // do not allow hovering
-    hoverConnectedEdges: true, // do highlight connected edges when hovering a node
+    hoverConnectedEdges: true, // do not highlight connected edges when hovering a node
     navigationButtons: true, // do not show navigation buttons
-    keyboard: true, // do not allow using the keyboard
     multiselect: false, // do not allow multiselect
+    keyboard: {
+      enabled: true,
+      speed: { x: 10, y: 10, zoom: 0.02 },
+      bindToWindow: true,
+    }, // do not allow keyboard navigation
+  },
+  configure: {
+    enabled: true,
+    filter: "nodes,edges",
+    showButton: true,
   },
   physics: {
     enabled: true,
@@ -35,27 +46,29 @@ var options = {
   nodes: {
     shape: "dot",
     size: 21,
+    borderWidth: 1,
     widthConstraint: { maximum: 200 },
+    shadow: {
+      enabled: true,
+      size: 8,
+    },
     font: {
       size: 24,
       color: "#000000",
+      strokeWidth: 5,
     },
   },
   edges: {
     smooth: true,
+    hoverWidth: 2.5,
     width: 2,
     arrows: { to: { enabled: true, scaleFactor: 1, type: "arrow" } },
-  },
-  physics: {
-    enabled: true,
-    hierarchicalRepulsion: { nodeDistance: 180 },
-    solver: "hierarchicalRepulsion",
   },
 };
 
 // Initialize the network
-var container = document.getElementById("mynetwork");
-var network = new vis.Network(
+const container = document.getElementById("mynetwork");
+const network = new vis.Network(
   container,
   { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) },
   options
@@ -63,18 +76,18 @@ var network = new vis.Network(
 
 // Function that highlights the path of a selected node
 network.on("selectNode", function (params) {
-  var selectedNodeId = params.nodes[0];
-  var selectedNode = nodes.find((node) => node.id === selectedNodeId);
-  var rootId = selectedNode.rootId;
-  var root = nodes.find((node) => node.id === rootId);
-  var path = getPath(root, selectedNode);
-  var pathIds = path.map((node) => node.id);
+  const selectedNodeId = params.nodes[0];
+  const selectedNode = nodes.find((node) => node.id === selectedNodeId);
+  const rootId = selectedNode.rootId;
+  const root = nodes.find((node) => node.id === rootId);
+  const path = getPath(root, selectedNode);
+  const pathIds = path.map((node) => node.id);
   network.selectNodes(pathIds);
 });
 
 function getPath(root, selectedNode) {
-  var path = [];
-  var currentNode = selectedNode;
+  const path = [];
+  const currentNode = selectedNode;
   while (currentNode.id !== root.id) {
     path.push(currentNode);
     currentNode = nodes.find((node) => node.id === currentNode.parentId);
