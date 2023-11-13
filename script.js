@@ -16,7 +16,8 @@ const options = {
       sortMethod: "directed",
     },
   },
-  // put a limit on how much to zoom in & out
+  // can you add boundaries to the network?
+
   interaction: {
     dragNodes: true, // do not allow dragging nodes
     dragView: true, // do not allow dragging the view
@@ -33,15 +34,44 @@ const options = {
       bindToWindow: true,
     }, // do not allow keyboard navigation
   },
-  configure: {
-    enabled: true,
-    filter: "nodes,edges",
-    showButton: true,
-  },
+  // configure: {
+  //   enabled: true,
+  //   filter: "nodes,edges",
+  //   showButton: true,
+  // },
   physics: {
-    enabled: true,
-    hierarchicalRepulsion: { nodeDistance: 180 },
+    // enabled: false,
+    stabilization: {
+      enabled: false,
+      iterations: 1000,
+      updateInterval: 100,
+    },
+    hierarchicalRepulsion: {
+      nodeDistance: 150,
+      centralGravity: 0.0,
+      springLength: 100,
+      springConstant: 0.01,
+      damping: 0.1,
+    },
+    // forceAtlas2Based: {
+    //   // gravitationalConstant: -50,
+    //   // centralGravity: 0.01,
+    //   // springConstant: 0.08,
+    //   springLength: 100,
+    //   // damping: 0.4,
+    //   avoidOverlap: 1,
+    // },
     solver: "hierarchicalRepulsion",
+    barnesHut: {
+      gravitationalConstant: -80000,
+      centralGravity: 0.3,
+      // springLength: 95,
+      // springConstant: 0.04,
+      // damping: 0.09,
+      avoidOverlap: 1,
+    },
+    timestep: 0.5,
+    adaptiveTimestep: true,
   },
   nodes: {
     shape: "dot",
@@ -55,7 +85,7 @@ const options = {
     font: {
       size: 24,
       color: "#000000",
-      strokeWidth: 5,
+      strokeWidth: 10,
     },
   },
   edges: {
