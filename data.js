@@ -20,6 +20,84 @@ function createNode(id, label, level, styleCategory, pid = null) {
   };
 }
 
+// Array of selectable options for the Channel strip dropdowns
+export const channelStripOptions = [
+  { value: "Input", label: "Input" },
+  { value: "Reverb", label: "Reverb" },
+  { value: "Delay", label: "Delay" },
+  { value: "Saturation", label: "Saturation" },
+  { value: "Pitch Shifter", label: "Pitch Shifter" },
+];
+
+// write a feature that creates a node with a dropdown capabilities, whose values can be changed dynamically by the user based on the channelStripOptions values. Both the id, the label & all of its children will also change whenever a selection is made, yet everything (edge-wise & node-wise) before the selection will remain the same.
+export const createChannelStripNode = (
+  id,
+  label,
+  level,
+  styleCategory,
+  pid = null,
+  value
+) => {
+  return {
+    id,
+    label,
+    level,
+    color: nodeStyles[styleCategory].color,
+    pid, // Parent ID for maintaining parent-child relationship
+    value,
+  };
+};
+
+// Array of selectable options for the Reverb dropdowns
+export const reverbOptions = [
+  { value: "Room", label: "Room" },
+  { value: "Hall", label: "Hall" },
+  { value: "Plate", label: "Plate" },
+  { value: "Chamber", label: "Chamber" },
+  { value: "Space", label: "Space" },
+];
+
+// Array of selectable options for the Delay dropdowns
+export const delayOptions = [
+  { value: "Mono", label: "Mono" },
+  { value: "Stereo", label: "Stereo" },
+  { value: "Ping Pong", label: "Ping Pong" },
+  { value: "Reverse", label: "Reverse" },
+];
+
+// Array of selectable options for the Saturation dropdowns
+export const saturationOptions = [
+  { value: "Tube", label: "Tube" },
+  { value: "Tape", label: "Tape" },
+  { value: "Transistor", label: "Transistor" },
+  { value: "Digital", label: "Digital" },
+  { value: "Rectify", label: "Rectify" },
+];
+
+// Array of selectable options for the Pitch Shifter dropdowns
+export const pitchShifterOptions = [
+  { value: "Up", label: "Up" },
+  { value: "Down", label: "Down" },
+  { value: "Up/Down", label: "Up/Down" },
+  { value: "Octave Up", label: "Octave Up" },
+  { value: "Octave Down", label: "Octave Down" },
+];
+
+// Array of selectable options for the Master Control dropdowns
+export const masterControlOptions = [
+  { value: "Bypass", label: "Bypass" },
+  { value: "On", label: "On" },
+];
+
+// Array of selectable options for the Wet/Dry Mix dropdowns
+export const wetDryMixOptions = [
+  { value: "0%", label: "0 %" },
+  { value: "25%", label: "25 %" },
+  { value: "50%", label: "50 %" },
+  { value: "75%", label: "75 %" },
+  { value: "100%", label: "100 %" },
+];
+
 // Nodes array
 export const nodes = [
   /* AUDIO INPUT NODES */

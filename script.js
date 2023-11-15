@@ -78,7 +78,7 @@ const options = {
     widthConstraint: { maximum: 200 },
     shadow: {
       enabled: true,
-      size: 8,
+      size: 6,
     },
     font: {
       size: 24,

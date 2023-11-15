@@ -2,6 +2,22 @@
   margin: auto;
 }
 
+/* add background image */
+body {
+  /* background-image: url("https://user-images.githubusercontent.com/104343338/282534034-9bd94a2f-c4be-4d8c-90b3-b0a5cb11513f.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; */
+}
+
+body {
+  /* z-index: 1; */
+  width: 100vw;
+  height: 100vh;
+  background-color: floralwhite;
+}
+
 #main-title {
   font-family: "Courier New", Courier, monospace;
   color: white;
@@ -14,6 +30,7 @@
   position: relative;
   width: 85vw;
   height: 70vh;
+  background-color: white;
 }
 
 .vis-network::before {
