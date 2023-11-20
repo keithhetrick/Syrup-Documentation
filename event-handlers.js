@@ -1,6 +1,6 @@
 import {
   getPath,
-  getAudioPath,
+  // getAudioPath,
   // getInputPath
   // setChannelStripOptions,
 } from "./helper-functions.js";
@@ -18,12 +18,12 @@ export function setupEventListeners(network, nodes, edges) {
   });
 
   // getAudioPath button
-  const getAudioPathButton = document.createElement("button");
-  getAudioPathButton.innerHTML = "Get Audio Path";
-  getAudioPathButton.addEventListener("click", function () {
-    handleSearchButtonClick(network, nodes, edges, getAudioPath);
-  });
-  document.body.appendChild(getAudioPathButton);
+  // const getAudioPathButton = document.createElement("button");
+  // getAudioPathButton.innerHTML = "Get Audio Path";
+  // getAudioPathButton.addEventListener("click", function () {
+  //   handleSearchButtonClick(network, nodes, edges, getAudioPath);
+  // });
+  // document.body.appendChild(getAudioPathButton);
 
   // getInputPath button
   // const getInputPathButton = document.createElement("button");
