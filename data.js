@@ -54,7 +54,7 @@ export const nodes = [
   ),
 
   /* AI PROCESSING */
-  createNode("AI Processing", "AI Processing", 4, "host", "Signal Bridge"),
+  createNode("AI PROCESSING", "AI PROCESSING", 4, "host", "Signal Bridge"),
 
   /* EFFECTS SIGNAL MANAGER */
   createNode(
@@ -330,7 +330,7 @@ export const edges = [
   { from: "Signal Bridge", dashes: true, to: "Signal Output" },
   { from: "Signal Bridge Output", dashes: true, to: "Signal Bridge" },
   { from: "Signal Bridge Input", to: "EFFECTS SIGNAL MANAGER" },
-  { from: "Signal Bridge", to: "AI Processing" },
+  { from: "Signal Bridge", to: "AI PROCESSING" },
   { from: "EFFECTS SIGNAL MANAGER", dashes: true, to: "Signal Bridge Output" },
 
   /* MODULE MANAGER EDGES */
@@ -342,7 +342,7 @@ export const edges = [
   { from: "Gate", to: "CHANNEL EFFECTS MANAGER" },
 
   /* AI PROCESSING EDGES */
-  { from: "AI Processing", dashes: true, to: "Signal Bridge" },
+  { from: "AI PROCESSING", dashes: true, to: "Signal Bridge" },
 
   /* EFFECTS SIGNAL MANAGER EDGES */
   { from: "EFFECTS SIGNAL MANAGER", to: "Effects Signal Manager Input" },
