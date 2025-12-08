@@ -314,8 +314,6 @@ if (!container) {
       edgesDS.update(edgeUpdates);
       miniNodesDS.update(nodeUpdates);
       miniEdgesDS.update(edgeUpdates);
-      network.fit({ animation: true });
-      if (miniNetwork) miniNetwork.fit();
     };
 
     // Setup event listeners and UI controls
@@ -340,11 +338,23 @@ if (!container) {
       },
       container
     );
-    const defaultMode = "architect";
+    const clearHiddenAll = () => {
+      const nodeUpdates = nodesDS.get().map((n) => ({ id: n.id, hidden: false }));
+      const edgeUpdates = edgesDS.get().map((e) => ({ id: e.id, hidden: false }));
+      nodesDS.update(nodeUpdates);
+      edgesDS.update(edgeUpdates);
+      miniNodesDS.update(nodeUpdates);
+      miniEdgesDS.update(edgeUpdates);
+    };
+
     const performResetAndFit = () => {
-      resetData(defaultMode);
+      const initialMode = "architect";
       document.body.classList.remove("theme-dark");
-      network.fit({ animation: { duration: 600 } });
+      resetData(initialMode);
+      clearHiddenAll();
+      network.unselectAll();
+      network.fit({ animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+      if (miniNetwork) miniNetwork.fit({ animation: false });
     };
 
     performResetAndFit();

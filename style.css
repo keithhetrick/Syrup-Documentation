@@ -216,7 +216,7 @@ body.theme-dark .tour-pointer::after {
   border-radius: 12px;
   position: relative;
   overflow: hidden;
-  touch-action: none;
+  touch-action: auto;
   /* Subtle vertical bands to hint major phases (input → managers → modules → output) */
   background: linear-gradient(
       to bottom,
