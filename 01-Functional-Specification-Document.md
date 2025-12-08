@@ -15,6 +15,8 @@
 - To provide a comprehensive plugin for enhancing audio tracks with a range of effects.
 - To provide a one-stop shop for music professionals that provide industry-level quality, as well as generating unique textures and soundscapes using granular synthesis.
 - To introduce unique functionalities like AI recommendations, vocal harmonies, and granular synthesis manipulation.
+- To model a decoupled, modular architecture where each processing block owns a single responsibility and communicates over explicit interfaces.
+- To demonstrate a production-ready UX layer (guided tours, presets, A/B compare, responsive layout) alongside the audio architecture.
 
 ### Target Audience
 
@@ -58,6 +60,7 @@
 #### AI Integration
 
 - **AI-Powered Recommendations**: Suggests optimal effects chains based on the audio, including granular synthesis settings.
+- **Signal-Aware Guidance**: Integrates with the UI guided tour to surface suggested paths and module highlights.
 
 #### Vocal Harmony Feature
 
@@ -72,16 +75,22 @@
 
 - **Modern Design**: Sleek, intuitive interface with a slate gray finish and granular synthesis controls.
 - **Responsive Layout**: Adaptable to various screen sizes, including granular synthesis modules.
+- **Interactive Blueprint**: Live, zoom-to-fit signal-flow map with guided tours, presets, A/B compares, collapsible modules, keyboard shortcuts, and mobile hamburger/overlay.
+- **Edge Semantics**: Audio/control/return edges are typed and labeled; nodes display concise role/latency metadata.
 
 ### Testing and Quality Assurance
 
 - Rigorous testing across different DAWs for compatibility and stability, including granular synthesis features.
+- UI regression coverage for guided tour timing, presets, mode toggles, and mobile interactions (hamburger/overlay).
+- Keyboard and accessibility checks: reduced-motion honoring, keyboard shortcuts (`D`, `R`, `ESC`), double-click clears, and focus/dimming behaviors.
 
 ### Non-functional Requirements
 
 - **Performance**: Low CPU usage, ensuring smooth operation in real-time audio processing, including efficient granular synthesis.
 - **Reliability**: Stable across all supported platforms and DAWs, even with complex granular processing.
 - **Usability**: Intuitive for both novice and experienced users, with user-friendly granular synthesis controls.
+- **Responsiveness**: Layout adapts from desktop to mobile; controls remain reachable; reduced-motion respects user preferences.
+- **Modularity**: Each module is independently testable and swappable; edges and parents are explicit for clear dependency mapping.
 
 ---
 

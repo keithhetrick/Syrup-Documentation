@@ -1,15 +1,32 @@
-export function getPath(root, selectedNode, nodes) {
+export function getPath(root, selectedNode, nodes, lookup) {
+  if (!root || !selectedNode) return [];
   const path = [];
   let currentNode = selectedNode;
   while (currentNode && currentNode?.id !== root?.id) {
     path.push(currentNode);
-    currentNode = nodes?.find((node) => node?.id === currentNode?.parentId);
+    currentNode =
+      lookup?.get(currentNode?.parentId) ||
+      nodes?.find((node) => node?.id === currentNode?.parentId);
   }
   path.push(root);
   return path;
 }
 
-export function getAudioPath(root, nodes, edges) {
+export function findRoot(node, nodes, lookup) {
+  let current = node;
+  let lastValid = node;
+  while (current?.parentId) {
+    const parent =
+      lookup?.get(current.parentId) ||
+      nodes?.find((n) => n?.id === current?.parentId);
+    if (!parent) break;
+    lastValid = parent;
+    current = parent;
+  }
+  return lastValid;
+}
+
+export function getAudioPath(root, nodes, edges, lookup) {
   const start = root || nodes?.find((node) => node.label === "AUDIO INPUT");
   const end = nodes?.find((node) => node?.label === "AUDIO OUTPUT");
 
@@ -29,7 +46,10 @@ export function getAudioPath(root, nodes, edges) {
     }
     const children = edges
       .filter((edge) => edge?.from === node?.id)
-      .map((edge) => nodes?.find((node) => node?.id === edge?.to));
+      .map(
+        (edge) =>
+          lookup?.get(edge?.to) || nodes?.find((node) => node?.id === edge?.to)
+      );
     queue.push(...children);
   }
 
@@ -38,17 +58,19 @@ export function getAudioPath(root, nodes, edges) {
   return path;
 }
 
-// Write a function that checks if the edges of each node contains a dashes boolean value of "true", then do not highlight edge
+// Checks if the edges of each node contains a dashes boolean value of "true", then do not highlight edge
 export function getEdges(nodes, edges) {
-  const edgesToHighlight = [];
-  edges.forEach((edge) => {
-    const fromNode = nodes?.find((node) => node?.id === edge?.from);
-    const toNode = nodes?.find((node) => node?.id === edge?.to);
-    if (fromNode && toNode && edge.dashes) {
-      edgesToHighlight?.push(edge);
-    }
-  });
-
-  console.log("EDGES TO HIGHLIGHT: ", edgesToHighlight);
+  const edgesToHighlight = edges
+    .filter((edge) => edge?.isReturn || edge?.dashes)
+    .map((edge) => edge?.id ?? `${edge?.from}->${edge?.to}`);
   return edgesToHighlight;
+}
+
+export function buildEdgeType(edge, nodes) {
+  if (edge?.isReturn || edge?.dashes) return "return";
+  const fromNode = nodes?.find((n) => n?.id === edge?.from);
+  const toNode = nodes?.find((n) => n?.id === edge?.to);
+  if (fromNode?.group === "control" || toNode?.group === "control")
+    return "control";
+  return "audio";
 }
