@@ -89,7 +89,12 @@ const channelEffects = ["Reverb", "Delay", "Saturation", "Pitch Shifter"].flatMa
   effectTemplate(fx, 17)
 );
 
-export const nodes = [...rootNodes, ...channelEffects];
+// New industry-standard signal processing modules
+const dynamicsModules = ["Parametric EQ", "Noise Reduction", "Soft Clipping"].flatMap((fx) =>
+  effectTemplate(fx, 12)
+);
+
+export const nodes = [...rootNodes, ...channelEffects, ...dynamicsModules];
 
 // Core edges
 const baseEdges = [
@@ -104,8 +109,11 @@ const baseEdges = [
   { from: "Signal Bridge", to: "AI PROCESSING" },
   { from: "EFFECTS SIGNAL MANAGER", to: "Signal Bridge Output", dashes: true },
   { from: "MODULE MANAGER", to: "Module Manager Input" },
-  { from: "Module Manager Input", to: "Compression" },
+  { from: "Module Manager Input", to: "Parametric EQ" },
   { from: "Module Manager Output", to: "MODULE MANAGER", dashes: true },
+  { from: "Parametric EQ", to: "Noise Reduction" },
+  { from: "Noise Reduction", to: "Soft Clipping" },
+  { from: "Soft Clipping", to: "Compression" },
   { from: "Compression", to: "Limiter" },
   { from: "Limiter", to: "Gate" },
   { from: "Gate", to: "CHANNEL EFFECTS MANAGER" },
@@ -155,7 +163,24 @@ const effectEdges = channelEffects.flatMap((node) => {
   return [];
 });
 
-export const edges = [...baseEdges, ...effectEdges].map((edge) => ({
+// Auto edges for dynamics modules
+const dynamicsEdges = dynamicsModules.flatMap((node) => {
+  const id = node.id;
+  if (id.endsWith(" Input")) {
+    const fx = id.replace(" Input", "");
+    return [
+      { from: fx, to: id },
+      { from: id, to: `${fx} Parameter Control` },
+      { from: `${fx} Parameter Control`, to: `${fx} Processing` },
+      { from: `${fx} Processing`, to: `${fx} Wet/Dry Mix` },
+      { from: `${fx} Wet/Dry Mix`, to: `${fx} Output`, dashes: true },
+      { from: `${fx} Output`, to: fx, dashes: true },
+    ];
+  }
+  return [];
+});
+
+export const edges = [...baseEdges, ...effectEdges, ...dynamicsEdges].map((edge) => ({
   id: edgeId(edge.from, edge.to),
   ...edge,
 }));

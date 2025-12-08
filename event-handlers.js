@@ -6,7 +6,7 @@ import {
   // getInputPath
   // setChannelStripOptions,
 } from "./helper-functions.js";
-import { HIGHLIGHT_DURATION_MS, legendIcons } from "./config.js";
+import { HIGHLIGHT_DURATION_MS, legendIcons, addUserPreset, removeUserPreset, getAllPresets } from "./config.js";
 import { createFocusController, createHideController } from "./ui-helpers.js";
 
 const edgeTypeStyles = {
@@ -186,6 +186,52 @@ export function setupEventListeners(
         preset.label.startsWith("A/B") ? "A/B Compare" : "Presets"
       );
     });
+
+  // Add buttons for user-created presets dynamically
+  const renderUserPresets = () => {
+    // Clear existing user preset buttons
+    const userPresetGroup = controlsContainer.querySelector('[data-group="User Presets"]');
+    if (userPresetGroup) {
+      userPresetGroup.remove();
+    }
+    
+    // Re-render user presets
+    Object.entries(config.userPresets || {}).forEach(([, preset]) => {
+      addButton(
+        preset.label,
+        () => {
+          selectPath(preset.nodes);
+          scheduleClear(HIGHLIGHT_DURATION_MS, getActiveNodes(), getActiveEdges());
+        },
+        "User Presets"
+      );
+    });
+  };
+
+  // Add button to save current selection as a preset
+  addButton("Save Current Path", () => {
+    const selectedNodes = network.getSelectedNodes();
+    if (selectedNodes.length === 0) {
+      alert("Please select nodes to create a preset. Click nodes or use a preset to highlight a path first.");
+      return;
+    }
+    
+    const presetName = prompt("Enter a name for this preset:");
+    if (!presetName) return;
+    
+    const presetKey = presetName.replace(/\s+/g, "_").toLowerCase();
+    
+    try {
+      config.addUserPreset(presetKey, presetName, selectedNodes);
+      renderUserPresets();
+      alert(`Preset "${presetName}" saved successfully!`);
+    } catch (err) {
+      alert(`Error saving preset: ${err.message}`);
+    }
+  }, "User Presets");
+
+  // Initial render of user presets
+  renderUserPresets();
 
   addButton("Return Edges", () => {
     const dashedEdgeIds = getEdges(getActiveNodes(), getActiveEdges());
