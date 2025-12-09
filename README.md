@@ -23,6 +23,51 @@ Visit the [Syrup Modular Signal Flow website](https://keithhetrick.github.io/Syr
 - Guided Tour: in-graph and mini-map pointers step through the path with timing tuned for presentations.
 - Keyboard: `D` toggles theme, `R` resets current mode and fits view. Double-click clears highlights; hamburger/overlay keep controls usable on mobile/tablet.
 
+## New Interactive Features
+
+### Dynamic Preset Generation
+- **Automatic preset building** from effect templates - no more hardcoded signal chains
+- **Flexible combinations**: Create custom A/B chains with any effect combination
+- **Template-based system**: Define once in `data.js`, reuse everywhere in `config.js`
+
+### Real-time Signal Flow Simulation
+- **Runtime API** accessible via `window.syrupSignalFlow` for interactive testing
+- **Path highlighting**: Animate signal flow through the graph with configurable speed
+- **Latency calculation**: Real-time estimation of processing delays across signal paths
+- **Audio previews**: Select any node to preview its signal path and total latency
+
+```javascript
+// Example: Simulate signal flow
+window.syrupSignalFlow.simulateSignalFlow(pathNodes, { 
+  duration: 300,  // ms per node
+  showLatency: true 
+});
+
+// Calculate latency for a path
+const latency = window.syrupSignalFlow.calculatePathLatency(pathNodes);
+console.log(`Total latency: ${latency.total.toFixed(2)}ms`);
+
+// Preview path to selected node
+window.syrupSignalFlow.previewAudioPath("Reverb");
+```
+
+### Drag-and-Drop Node Positioning
+- **Repositionable nodes**: Drag any node to adjust the graph layout on-the-fly
+- **Session persistence**: Your custom positions are saved automatically
+- **Reset capability**: "Reset Node Positions" button restores default layout
+- **Visual feedback**: Enhanced shadows and borders during drag operations
+
+### Visual and Audio Feedback
+- **Waveform animations**: Toggle animated processing indicators on effect nodes
+- **Latency display**: "Show Path Latency" button provides detailed analysis
+- **Simulate Audio Path**: Watch signal flow through the entire audio chain
+- **Console logging**: Real-time feedback during simulations with latency info
+
+### New Control Groups
+- **Interactivity**: Contains simulation, latency, and waveform controls
+- **Navigation**: Enhanced with node position reset functionality
+- All existing controls remain fully functional
+
 ## What this repo demonstrates (JD-aligned)
 
 - Translation of intricate mockups into live vector graphics with interactive controls (vis-network + custom UI).
@@ -33,6 +78,11 @@ Visit the [Syrup Modular Signal Flow website](https://keithhetrick.github.io/Syr
 
 ## Engineering notes
 
-- Data-driven graph: nodes/edges are templated, typed, and parented explicitly; edge IDs are stable; hidden sets avoid reflow on toggles.
-- Interaction stability: physics disabled after initial settle; zoom disabled to prevent mobile jitter; fit applied on load/reset; hamburger/overlay gate sidebar interactions on touch.
-- Semantics: edges labeled for audio/control/return; nodes carry role/latency metadata for richer tooltips and tours.
+- **Data-driven graph**: nodes/edges are templated, typed, and parented explicitly; edge IDs are stable; hidden sets avoid reflow on toggles.
+- **Dynamic preset generation**: Presets auto-generated from effect templates in `data.js`, eliminating hardcoded chains in `config.js`.
+- **Simplified edge routing**: Reorganized baseEdges with clear forward/return path separation for cleaner visualization.
+- **Runtime simulation API**: JavaScript API for interactive path highlighting, latency calculation, and audio previews.
+- **Drag-and-drop positioning**: SessionStorage-based persistence for custom node arrangements with visual feedback.
+- **Interaction stability**: physics disabled after initial settle; zoom disabled to prevent mobile jitter; fit applied on load/reset; hamburger/overlay gate sidebar interactions on touch.
+- **Semantics**: edges labeled for audio/control/return; nodes carry role/latency metadata for richer tooltips and tours.
+- **Waveform animations**: CSS-based visual feedback for processing nodes with toggle control.
