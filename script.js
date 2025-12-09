@@ -7,6 +7,10 @@ import {
   modes,
   legendIcons,
   HIGHLIGHT_DURATION_MS,
+  userPresets,
+  addUserPreset,
+  removeUserPreset,
+  getAllPresets,
 } from "./config.js";
 
 // normalize data with ids for vis.js selection APIs
@@ -35,6 +39,9 @@ const describeNode = (node) =>
 // Optional richer metadata for tooltips
 const nodeMeta = {
   "Master Control": { latency: "0.3ms", params: "Wet/Dry, Macro", role: "Global mix" },
+  "Parametric EQ": { latency: "0.2ms", params: "Frequency, Q, Gain", role: "Tonal shaping" },
+  "Noise Reduction": { latency: "1.5ms", params: "Threshold, Amount, Learn", role: "Noise removal" },
+  "Soft Clipping": { latency: "~0ms", params: "Drive, Shape, Mix", role: "Soft limiting" },
   "Compression": { latency: "1.0ms", params: "Threshold, Ratio, Attack/Release", role: "Dynamics" },
   "Limiter": { latency: "0.8ms", params: "Ceiling, Lookahead", role: "Ceiling" },
   "Gate": { latency: "0.5ms", params: "Threshold, Range, Hold/Release", role: "Noise cleanup" },
@@ -408,6 +415,10 @@ if (!container) {
         collapsibleGroups,
         modes,
         legendIcons,
+        userPresets,
+        addUserPreset,
+        removeUserPreset,
+        getAllPresets,
       },
       container
     );

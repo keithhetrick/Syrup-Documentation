@@ -1,5 +1,5 @@
 // Central configuration for the Syrup signal flow presentation.
-import { generatePreset, presetTemplates, channelEffectsList } from "./data.js";
+import { generatePreset, presetTemplates, channelEffectsList, dynamicsModulesList } from "./data.js";
 
 export const HIGHLIGHT_DURATION_MS = 5000;
 
@@ -17,9 +17,63 @@ export const presets = {
   
   // Dry path from template
   dryPath: presetTemplates.dryPath,
+  
+  // New presets from master branch - using dynamic generation
+  cleaningChain: generatePreset("Cleaning Chain", [], true), // Just dynamics modules, no channel effects
+  fullDynamicsChain: generatePreset("Full Dynamics Chain", [], true), // Full dynamics processing
+  masteringChain: generatePreset("Mastering Chain", [], true), // Mastering-focused chain
 };
 
+// User-created presets - dynamically managed (from master branch)
+export const userPresets = {};
+
+// Function to add a user preset dynamically
+export function addUserPreset(name, label, nodes) {
+  if (!name || !label || !Array.isArray(nodes)) {
+    throw new Error("Invalid preset: name, label, and nodes array required");
+  }
+  userPresets[name] = { label, nodes };
+  return userPresets[name];
+}
+
+// Function to remove a user preset
+export function removeUserPreset(name) {
+  if (userPresets[name]) {
+    delete userPresets[name];
+    return true;
+  }
+  return false;
+}
+
+// Function to get all presets (built-in + user)
+export function getAllPresets() {
+  return { ...presets, ...userPresets };
+}
+
 export const collapsibleGroups = {
+  // New dynamics modules from master branch
+  "Parametric EQ": [
+    "Parametric EQ Input",
+    "Parametric EQ Output",
+    "Parametric EQ Parameter Control",
+    "Parametric EQ Processing",
+    "Parametric EQ Wet/Dry Mix",
+  ],
+  "Noise Reduction": [
+    "Noise Reduction Input",
+    "Noise Reduction Output",
+    "Noise Reduction Parameter Control",
+    "Noise Reduction Processing",
+    "Noise Reduction Wet/Dry Mix",
+  ],
+  "Soft Clipping": [
+    "Soft Clipping Input",
+    "Soft Clipping Output",
+    "Soft Clipping Parameter Control",
+    "Soft Clipping Processing",
+    "Soft Clipping Wet/Dry Mix",
+  ],
+  // Original channel effects
   Reverb: [
     "Reverb Input",
     "Reverb Output",
@@ -71,6 +125,9 @@ export const modes = {
       "EFFECTS SIGNAL MANAGER",
       "Master Control",
       "MODULE MANAGER",
+      "Parametric EQ",
+      "Noise Reduction",
+      "Soft Clipping",
       "Compression",
       "Limiter",
       "Gate",

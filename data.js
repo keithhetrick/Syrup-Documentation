@@ -89,11 +89,23 @@ const channelEffects = ["Reverb", "Delay", "Saturation", "Pitch Shifter"].flatMa
   effectTemplate(fx, 17)
 );
 
-export const nodes = [...rootNodes, ...channelEffects];
+// New industry-standard signal processing modules (from master branch)
+const dynamicsModules = ["Parametric EQ", "Noise Reduction", "Soft Clipping"].flatMap((fx) =>
+  effectTemplate(fx, 12)
+);
+
+export const nodes = [...rootNodes, ...channelEffects, ...dynamicsModules];
 export const channelEffectsList = ["Reverb", "Delay", "Saturation", "Pitch Shifter"];
+export const dynamicsModulesList = ["Parametric EQ", "Noise Reduction", "Soft Clipping"];
 
 // Processing nodes for visual effects and animations
-export const processingNodesList = ["Compression", "Limiter", "Gate", ...channelEffectsList];
+export const processingNodesList = [
+  "Compression",
+  "Limiter",
+  "Gate",
+  ...dynamicsModulesList,
+  ...channelEffectsList
+];
 
 // Core edges - optimized to reduce redundancy
 // Removed redundant dashed paths for cleaner graph visualization
@@ -113,7 +125,10 @@ const baseEdges = [
   { from: "Master Control Processing", to: "Master Control Wet/Dry Mix" },
   { from: "Master Control Wet/Dry Mix", to: "MODULE MANAGER" },
   { from: "MODULE MANAGER", to: "Module Manager Input" },
-  { from: "Module Manager Input", to: "Compression" },
+  { from: "Module Manager Input", to: "Parametric EQ" },
+  { from: "Parametric EQ", to: "Noise Reduction" },
+  { from: "Noise Reduction", to: "Soft Clipping" },
+  { from: "Soft Clipping", to: "Compression" },
   { from: "Compression", to: "Limiter" },
   { from: "Limiter", to: "Gate" },
   { from: "Gate", to: "CHANNEL EFFECTS MANAGER" },
@@ -146,8 +161,8 @@ const baseEdges = [
   { from: "Output Main", to: "AUDIO OUTPUT", dashes: true },
 ];
 
-// Auto edges for templated effects
-const effectEdges = channelEffects.flatMap((node) => {
+// Auto edges for templated effects (channel effects and dynamics modules)
+const effectEdges = [...channelEffects, ...dynamicsModules].flatMap((node) => {
   const id = node.id;
   if (id.endsWith(" Input")) {
     const fx = id.replace(" Input", "");
@@ -169,7 +184,7 @@ export const edges = [...baseEdges, ...effectEdges].map((edge) => ({
 }));
 
 // Dynamic preset generator - creates signal chain presets based on effect combinations
-export function generatePreset(label, effectCombinations = []) {
+export function generatePreset(label, effectCombinations = [], includeDynamics = true) {
   const baseChain = [
     "AUDIO INPUT",
     "SIGNAL MANAGER",
@@ -179,6 +194,12 @@ export function generatePreset(label, effectCombinations = []) {
     "Effects Signal Manager Input",
     "Master Control",
     "MODULE MANAGER",
+  ];
+
+  // Add dynamics modules if requested (default: true)
+  const dynamicsChain = includeDynamics ? dynamicsModulesList : [];
+  
+  const compressionChain = [
     "Compression",
     "Limiter",
     "Gate",
@@ -195,7 +216,7 @@ export function generatePreset(label, effectCombinations = []) {
   // Build the full chain with selected effects
   return {
     label,
-    nodes: [...baseChain, ...effectCombinations, ...outputChain],
+    nodes: [...baseChain, ...dynamicsChain, ...compressionChain, ...effectCombinations, ...outputChain],
   };
 }
 
