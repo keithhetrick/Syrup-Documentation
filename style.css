@@ -466,3 +466,67 @@ button:active {
   color: var(--muted);
   margin-bottom: 0.35rem;
 }
+
+/* Waveform animation effects for processing nodes */
+@keyframes latency-indicator {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
+#mynetwork.waveform-active {
+  position: relative;
+}
+
+#mynetwork.waveform-active::after {
+  content: "🎵 Waveform Mode Active";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 149, 0, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
+  animation: latency-indicator 2s infinite;
+}
+
+/* Drag feedback styling */
+.vis-network:active {
+  cursor: grabbing !important;
+}
+
+/* Enhanced node interaction feedback */
+.tour-pointer,
+.mini-pointer {
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* Latency display overlay */
+.latency-overlay {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 20px;
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 1000;
+  animation: latency-indicator 2s infinite;
+}

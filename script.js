@@ -42,9 +42,9 @@ const describeNode = (node) =>
 // Optional richer metadata for tooltips
 const nodeMeta = {
   "Master Control": { latency: "0.3ms", params: "Wet/Dry, Macro", role: "Global mix" },
-  "Parametric EQ": { latency: "0.2ms", params: "Frequency, Q, Gain (multi-band)", role: "EQ/Tone" },
-  "Noise Reduction": { latency: "1.5ms", params: "Threshold, Reduction, Attack/Release", role: "Cleanup" },
-  "Soft Clipping": { latency: "~0ms", params: "Threshold, Knee, Drive", role: "Saturation/Limit" },
+  "Parametric EQ": { latency: "0.2ms", params: "Frequency, Q, Gain", role: "Tonal shaping" },
+  "Noise Reduction": { latency: "1.5ms", params: "Threshold, Amount, Learn", role: "Noise removal" },
+  "Soft Clipping": { latency: "~0ms", params: "Drive, Shape, Mix", role: "Soft limiting" },
   "Compression": { latency: "1.0ms", params: "Threshold, Ratio, Attack/Release", role: "Dynamics" },
   "Limiter": { latency: "0.8ms", params: "Ceiling, Lookahead", role: "Ceiling" },
   "Gate": { latency: "0.5ms", params: "Threshold, Range, Hold/Release", role: "Noise cleanup" },
@@ -261,6 +261,79 @@ if (!container) {
     // Physics stays off after initial draw to prevent jitter/auto-zoom on drag.
     network.setOptions({ physics: { enabled: false, stabilization: false } });
 
+    // Drag-and-drop node positioning with persistence
+    // Store custom positions in sessionStorage for on-the-fly adjustments
+    const positionStore = {
+      save: function(nodeId, position) {
+        try {
+          const positions = JSON.parse(sessionStorage.getItem('syrup-node-positions') || '{}');
+          positions[nodeId] = position;
+          sessionStorage.setItem('syrup-node-positions', JSON.stringify(positions));
+        } catch (e) {
+          console.warn('Failed to save node position:', e);
+        }
+      },
+      load: function() {
+        try {
+          return JSON.parse(sessionStorage.getItem('syrup-node-positions') || '{}');
+        } catch (e) {
+          console.warn('Failed to load node positions:', e);
+          return {};
+        }
+      },
+      clear: function() {
+        sessionStorage.removeItem('syrup-node-positions');
+      }
+    };
+
+    // Apply saved positions on load
+    const savedPositions = positionStore.load();
+    if (Object.keys(savedPositions).length > 0) {
+      Object.entries(savedPositions).forEach(([nodeId, pos]) => {
+        network.moveNode(nodeId, pos.x, pos.y);
+      });
+    }
+
+    // Drag-and-drop with visual feedback and position persistence
+    let draggedNode = null;
+    
+    network.on('dragStart', function(params) {
+      if (params.nodes.length > 0) {
+        draggedNode = params.nodes[0];
+        nodesDS.update({
+          id: draggedNode,
+          borderWidth: 4,
+          shadow: { enabled: true, size: 12 }
+        });
+      }
+    });
+
+    network.on('dragEnd', function(params) {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        
+        // Save position to sessionStorage
+        const position = network.getPositions([nodeId])[nodeId];
+        if (position) {
+          positionStore.save(nodeId, position);
+          console.log(`Node ${nodeId} position saved:`, position);
+        }
+        
+        // Restore normal appearance after drag
+        if (draggedNode) {
+          const node = nodeData.find(n => n.id === draggedNode);
+          if (node) {
+            nodesDS.update({
+              id: draggedNode,
+              borderWidth: 1,
+              shadow: { enabled: true, size: 6 }
+            });
+          }
+          draggedNode = null;
+        }
+      }
+    });
+
     // Mini-map overview for quick navigation (static, no interaction).
     const miniContainer = document.getElementById("mini-map");
     let miniNetwork = null;
@@ -374,6 +447,156 @@ if (!container) {
     performResetAndFit();
     network.stabilize();
     network.once("stabilizationIterationsDone", performResetAndFit);
+
+    // Real-time interactivity features
+    // Runtime simulation with active path highlighting
+    window.syrupSignalFlow = {
+      network,
+      nodesDS,
+      edgesDS,
+      nodeData,
+      edgeData,
+      positionStore, // Expose position storage for UI controls
+      
+      // Simulate signal flow through the graph with real-time highlighting
+      simulateSignalFlow: function(pathNodes, options = {}) {
+        const { 
+          duration = 300, 
+          color = "#ff9500",
+          showLatency = true,
+          callback = null 
+        } = options;
+        
+        if (!pathNodes || pathNodes.length === 0) return;
+        
+        let idx = 0;
+        const intervalId = setInterval(() => {
+          if (idx >= pathNodes.length) {
+            clearInterval(intervalId);
+            if (callback) callback();
+            return;
+          }
+          
+          const nodeId = pathNodes[idx];
+          const node = nodesDS.get(nodeId);
+          if (node) {
+            // Highlight current node
+            nodesDS.update({
+              id: nodeId,
+              color: {
+                background: color,
+                border: color,
+              },
+            });
+            
+            // Show latency info if available and requested
+            if (showLatency && nodeMeta[nodeId]) {
+              console.log(`Processing ${nodeId}: ${nodeMeta[nodeId].latency || 'N/A'}`);
+            }
+            
+            // Fade previous node back
+            if (idx > 0) {
+              const prevNodeId = pathNodes[idx - 1];
+              const prevNode = nodeData.find(n => n.id === prevNodeId);
+              if (prevNode) {
+                nodesDS.update({
+                  id: prevNodeId,
+                  color: {
+                    background: prevNode.baseColor,
+                    border: prevNode.baseColor,
+                  },
+                });
+              }
+            }
+          }
+          idx++;
+        }, duration);
+        
+        return intervalId;
+      },
+      
+      // Calculate and display total latency for a path
+      calculatePathLatency: function(pathNodes) {
+        let totalLatency = 0;
+        const latencyDetails = [];
+        
+        pathNodes.forEach(nodeId => {
+          if (nodeMeta[nodeId] && nodeMeta[nodeId].latency) {
+            const latencyStr = nodeMeta[nodeId].latency;
+            const latencyValue = parseFloat(latencyStr.replace('ms', '').replace('~', ''));
+            if (!isNaN(latencyValue)) {
+              totalLatency += latencyValue;
+              latencyDetails.push({ node: nodeId, latency: latencyValue });
+            }
+          }
+        });
+        
+        return { total: totalLatency, details: latencyDetails };
+      },
+      
+      // Preview audio path with visual feedback
+      previewAudioPath: function(nodeId) {
+        const node = nodeData.find(n => n.id === nodeId);
+        if (!node) return null;
+        
+        // Find path from input to this node with circular reference protection
+        // Note: This uses parentId which represents hierarchical structure, not signal flow.
+        // For edge-based signal flow paths, use helper-functions.js getAudioPath() instead
+        const path = [];
+        const visited = new Set();
+        let current = node;
+        const maxIterations = 100; // Safety limit
+        let iterations = 0;
+        
+        while (current && iterations < maxIterations) {
+          if (visited.has(current.id)) {
+            console.warn('Circular reference detected in node path');
+            break;
+          }
+          visited.add(current.id);
+          path.unshift(current.id);
+          current = nodeData.find(n => n.id === current.parentId);
+          iterations++;
+        }
+        
+        // Calculate latency for this path
+        const latencyInfo = this.calculatePathLatency(path);
+        
+        // Simulate the path
+        this.simulateSignalFlow(path, {
+          duration: 250,
+          showLatency: true,
+          callback: () => {
+            console.log(`Path preview complete. Total latency: ${latencyInfo.total.toFixed(2)}ms`);
+          }
+        });
+        
+        return {
+          path,
+          latency: latencyInfo
+        };
+      },
+      
+      // Get current node metadata including latency and parameters
+      getNodeInfo: function(nodeId) {
+        const node = nodeData.find(n => n.id === nodeId);
+        const meta = nodeMeta[nodeId];
+        
+        return {
+          node,
+          metadata: meta || {},
+          description: descriptions[nodeId] || 'No description available'
+        };
+      }
+    };
+    
+    // Expose runtime simulation controls in console
+    console.log('%c🎵 Syrup Signal Flow Runtime API Available', 'color: #ff9500; font-size: 14px; font-weight: bold;');
+    console.log('Use window.syrupSignalFlow for interactive controls:');
+    console.log('  - simulateSignalFlow(pathNodes, options)');
+    console.log('  - calculatePathLatency(pathNodes)');
+    console.log('  - previewAudioPath(nodeId)');
+    console.log('  - getNodeInfo(nodeId)');
   } catch (err) {
     container.innerHTML = "Error initializing network graph.";
     console.error(err);

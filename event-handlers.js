@@ -6,7 +6,8 @@ import {
   // getInputPath
   // setChannelStripOptions,
 } from "./helper-functions.js";
-import { HIGHLIGHT_DURATION_MS, legendIcons, addUserPreset, removeUserPreset, getAllPresets } from "./config.js";
+import { HIGHLIGHT_DURATION_MS, legendIcons } from "./config.js";
+import { processingNodesList } from "./data.js";
 import { createFocusController, createHideController } from "./ui-helpers.js";
 
 const edgeTypeStyles = {
@@ -335,6 +336,104 @@ export function setupEventListeners(
       network.setOptions({ physics: { enabled: false, stabilization: false } });
     }
   }, "Navigation");
+
+  // Drag-and-drop node positioning controls
+  addButton("Reset Node Positions", () => {
+    if (window.syrupSignalFlow && window.syrupSignalFlow.positionStore) {
+      window.syrupSignalFlow.positionStore.clear();
+      alert("Node positions cleared. Refresh page to reset layout.");
+    } else {
+      sessionStorage.removeItem('syrup-node-positions');
+      alert("Node positions cleared. Refresh page to reset layout.");
+    }
+  }, "Navigation");
+
+  // Real-time simulation and interactivity controls
+  addButton("Simulate Audio Path", () => {
+    if (window.syrupSignalFlow) {
+      const audioPath = [
+        "AUDIO INPUT",
+        "SIGNAL MANAGER",
+        "Signal Input",
+        "Signal Bridge",
+        "EFFECTS SIGNAL MANAGER",
+        "Effects Signal Manager Input",
+        "Master Control",
+        "MODULE MANAGER",
+        "Compression",
+        "Limiter",
+        "Gate",
+        "CHANNEL EFFECTS MANAGER",
+        "Channel Signal Bridge",
+        "Reverb",
+        "Signal Bridge Output",
+        "Output Main",
+        "AUDIO OUTPUT"
+      ];
+      const latency = window.syrupSignalFlow.calculatePathLatency(audioPath);
+      console.log(`Simulating audio path. Total latency: ${latency.total.toFixed(2)}ms`);
+      window.syrupSignalFlow.simulateSignalFlow(audioPath, { 
+        duration: 300, 
+        showLatency: true 
+      });
+    } else {
+      alert("Runtime API not available yet. Please wait for initialization.");
+    }
+  }, "Interactivity");
+
+  addButton("Show Path Latency", () => {
+    const selected = network.getSelectedNodes();
+    if (selected.length === 0) {
+      alert("Select a node to see its path latency");
+      return;
+    }
+    
+    if (window.syrupSignalFlow) {
+      const result = window.syrupSignalFlow.previewAudioPath(selected[0]);
+      if (result) {
+        const details = result.latency.details
+          .map(d => `${d.node}: ${d.latency.toFixed(2)}ms`)
+          .join('\n');
+        alert(`Path Latency Analysis\n\nTotal: ${result.latency.total.toFixed(2)}ms\n\nDetails:\n${details}`);
+      }
+    }
+  }, "Interactivity");
+
+  // Waveform animation controls
+  let waveformEnabled = false;
+  addButton("Toggle Waveform Animation", () => {
+    waveformEnabled = !waveformEnabled;
+    const graphContainer = document.getElementById("mynetwork");
+    
+    if (waveformEnabled) {
+      graphContainer.classList.add("waveform-active");
+      // Add visual indicator for active waveform mode
+      // Use processing effect nodes from data.js
+      // Filter nodes by ID (processingNodesList contains node IDs)
+      const activeNodes = getActiveNodes().filter(n => processingNodesList.includes(n.id));
+      
+      activeNodes.forEach(node => {
+        nodesDS.update({
+          id: node.id,
+          shadow: { enabled: true, size: 10, x: 0, y: 0, color: 'rgba(255, 149, 0, 0.5)' }
+        });
+      });
+      
+      console.log("Waveform animation enabled for processing nodes");
+    } else {
+      graphContainer.classList.remove("waveform-active");
+      // Remove visual indicator
+      const activeNodes = getActiveNodes();
+      activeNodes.forEach(node => {
+        nodesDS.update({
+          id: node.id,
+          shadow: { enabled: true, size: 6 }
+        });
+      });
+      
+      console.log("Waveform animation disabled");
+    }
+  }, "Interactivity");
 
   addButton("Toggle Dark/Light", () => {
     document.body.classList.toggle("theme-dark");
