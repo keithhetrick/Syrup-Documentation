@@ -93,6 +93,7 @@
   - On desktop/mobile, use overlays/drawers for controls; ensure ESC/overlay click cancels; summary double-click toggles dropdowns.
   - Respect `prefers-reduced-motion` by skipping non-essential animations; keyboard shortcuts must mirror UI actions for parity.
   - Component tree: Sidebar (Legend, Narrative, Mini-map) + Main (Controls panel, Controls help, Network canvas). Control groups: Navigation, Modes, Presets, A/B Compare, Views, Modules, Interactivity, Theme, User Presets.
+  - Data portability: User Presets can be imported/exported as JSON for sharing; keep schema `{ label, nodes[] }` with stable IDs.
 
 ---
 

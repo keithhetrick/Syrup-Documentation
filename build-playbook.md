@@ -85,6 +85,11 @@ Binding: UI reads from a parameter store; writes dispatch to controller → engi
 - Extract off-thread features (LUFS, crest factor, spectral tilt, transient density); feed a small model/ruleset to score existing chain/param templates.
 - Apply the winning preset via controller; never mutate graph ad hoc. Log recommendation + chosen preset for QA.
 
+## Data portability (presets)
+
+- User presets are JSON `{ label, nodes[] }` keyed by stable IDs. Import/export via UI to share across machines.
+- Validate on import: ensure label present and nodes is an array; skip invalid entries, log warning.
+
 ## QA checklist
 
 - Graph integrity: unique node/edge IDs, typed buses, no orphaned nodes after mode/preset.

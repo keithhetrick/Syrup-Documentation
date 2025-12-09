@@ -145,6 +145,19 @@ body {
   padding: 0.35rem 0;
   gap: 0.3rem;
 }
+#controls .macro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#controls .macro label {
+  font-size: 11px;
+  color: var(--muted);
+}
+#controls .macro input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
 #controls details.drawer {
   position: relative;
   overflow: visible;

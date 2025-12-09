@@ -270,6 +270,17 @@ export function setupEventListeners(
     edgesDS.update(edgeUpdates);
   };
 
+  const highlightWithDim = (ids) => {
+    if (!ids?.length) return;
+    cacheTourStyles();
+    selectPath(ids);
+    dimGraphForTour(ids);
+    setTimeout(() => {
+      restoreTourStyles();
+      resetFocus(getActiveNodes(), getActiveEdges());
+    }, HIGHLIGHT_DURATION_MS);
+  };
+
   // Event listener for highlighting the path of a selected node
   network.on("selectNode", function (params) {
     const activeNodes = getActiveNodes();
@@ -309,8 +320,7 @@ export function setupEventListeners(
       const activeEdges = getActiveEdges();
       const path = getAudioPath(null, activeNodes, activeEdges, lookups.nodeLookup);
       const pathIds = path?.map((node) => node.id);
-      selectPath(pathIds);
-      scheduleClear(HIGHLIGHT_DURATION_MS, getActiveNodes(), getActiveEdges());
+      highlightWithDim(pathIds);
     },
     "Views"
   );
@@ -321,8 +331,7 @@ export function setupEventListeners(
       addButton(
         preset.label,
         () => {
-          selectPath(preset.nodes);
-          scheduleClear(HIGHLIGHT_DURATION_MS, getActiveNodes(), getActiveEdges());
+          highlightWithDim(preset.nodes);
         },
         preset.label.startsWith("A/B") ? "A/B Compare" : "Presets"
       );
@@ -341,8 +350,7 @@ export function setupEventListeners(
       addButton(
         preset.label,
         () => {
-          selectPath(preset.nodes);
-          scheduleClear(HIGHLIGHT_DURATION_MS, getActiveNodes(), getActiveEdges());
+          highlightWithDim(preset.nodes);
         },
         "User Presets"
       );
@@ -382,6 +390,46 @@ export function setupEventListeners(
 
   // Initial render of user presets
   renderUserPresets();
+
+  // Inline macro controls (demonstration of parameter binding)
+  const macros = [
+    { id: "macro-wet", label: "Global Wet", min: 0, max: 100, value: 50 },
+    { id: "macro-dynamics", label: "Dynamics Depth", min: 0, max: 100, value: 60 },
+    { id: "macro-fx", label: "FX Mix", min: 0, max: 100, value: 55 },
+  ];
+  const macroWrapper = document.createElement("div");
+  macroWrapper.className = "control-group";
+  macros.forEach((m) => {
+    const wrap = document.createElement("div");
+    wrap.className = "macro";
+    const label = document.createElement("label");
+    label.htmlFor = m.id;
+    label.textContent = `${m.label}: ${m.value}%`;
+    const input = document.createElement("input");
+    input.type = "range";
+    input.id = m.id;
+    input.min = m.min;
+    input.max = m.max;
+    input.value = m.value;
+    input.addEventListener("input", (e) => {
+      const val = Number(e.target.value);
+      label.textContent = `${m.label}: ${val}%`;
+      // Hook: dispatch to controller/engine for real parameter binding
+      if (window.syrupSignalFlow) {
+        window.syrupSignalFlow.lastMacro = { id: m.id, value: val };
+      }
+    });
+    wrap.appendChild(label);
+    wrap.appendChild(input);
+    macroWrapper.appendChild(wrap);
+  });
+  const macroDetails = document.createElement("details");
+  macroDetails.dataset.group = "Macros";
+  const macroSummary = document.createElement("summary");
+  macroSummary.textContent = "Macros";
+  macroDetails.appendChild(macroSummary);
+  macroDetails.appendChild(macroWrapper);
+  controlsContainer.appendChild(macroDetails);
 
   addButton("Return Edges", () => {
     const dashedEdgeIds = getEdges(getActiveNodes(), getActiveEdges());
@@ -580,6 +628,19 @@ export function setupEventListeners(
     document.body.classList.toggle("theme-dark");
   }, "Theme");
   addButton(
+    "Toggle Offline Assets",
+    () => {
+      const cdnScript = document.querySelector('script[src*="vis-network"]');
+      if (cdnScript) {
+        cdnScript.src = "./assets/vendor/vis-network.min.js";
+        alert("Switched to local vis-network (requires local vendor files). Refresh to apply.");
+      } else {
+        alert("Local vendor not detected. Ensure ./assets/vendor/vis-network.min.js exists.");
+      }
+    },
+    "Theme"
+  );
+  addButton(
     "Keyboard Hints",
     () => {
       alert(
@@ -587,6 +648,52 @@ export function setupEventListeners(
       );
     },
     "Theme"
+  );
+  addButton(
+    "Import Presets (JSON)",
+    () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (parsed && typeof parsed === "object") {
+              Object.entries(parsed).forEach(([key, val]) => {
+                if (val?.label && Array.isArray(val.nodes)) {
+                  config.userPresets[key] = val;
+                }
+              });
+              alert("Presets imported.");
+              renderUserPresets();
+            }
+          } catch (err) {
+            alert("Invalid preset file.");
+          }
+        };
+        reader.readAsText(file);
+      });
+      input.click();
+    },
+    "User Presets"
+  );
+  addButton(
+    "Export Presets (JSON)",
+    () => {
+      const dataStr = JSON.stringify(config.userPresets || {}, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "syrup-user-presets.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+    "User Presets"
   );
 
   // Keyboard shortcuts for quick toggles
@@ -616,6 +723,30 @@ export function setupEventListeners(
     link.href = canvas.toDataURL("image/png");
     link.click();
   }, "Theme");
+  addButton(
+    "Latency Heatmap",
+    () => {
+      const activeEdges = getActiveEdges();
+      const maxLatency = Math.max(
+        ...activeEdges.map((e) => (typeof e.latency === "number" ? e.latency : 0)),
+        1
+      );
+      const updates = activeEdges.map((e) => {
+        const ratio = Math.min((e.latency || 0) / maxLatency, 1);
+        const color = `rgba(${Math.floor(255 * ratio)}, ${Math.floor(120 * (1 - ratio))}, 80, 0.8)`;
+        return { id: e.id, color: { color, highlight: color, hover: color } };
+      });
+      edgesDS.update(updates);
+      setTimeout(() => {
+        if (tourOriginalEdgeColors) {
+          edgesDS.update(
+            Array.from(tourOriginalEdgeColors.entries()).map(([id, color]) => ({ id, color }))
+          );
+        }
+      }, HIGHLIGHT_DURATION_MS);
+    },
+    "Views"
+  );
 
   // Mode switcher
   addButton(

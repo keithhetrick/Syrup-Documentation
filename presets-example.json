@@ -1,0 +1,115 @@
+{
+  "full_path": {
+    "label": "Full Path",
+    "nodes": [
+      "AUDIO INPUT",
+      "SIGNAL MANAGER",
+      "Signal Input",
+      "Signal Bridge",
+      "EFFECTS SIGNAL MANAGER",
+      "Effects Signal Manager Input",
+      "Master Control",
+      "MODULE MANAGER",
+      "Parametric EQ",
+      "Noise Reduction",
+      "Soft Clipping",
+      "Compression",
+      "Limiter",
+      "Gate",
+      "CHANNEL EFFECTS MANAGER",
+      "Channel Signal Bridge",
+      "Reverb",
+      "Delay",
+      "Saturation",
+      "Pitch Shifter",
+      "Signal Bridge Output",
+      "Output Main",
+      "AUDIO OUTPUT"
+    ]
+  },
+  "fx_parallel": {
+    "label": "FX Parallel",
+    "nodes": [
+      "Channel Signal Bridge",
+      "Reverb",
+      "Delay",
+      "Saturation",
+      "Pitch Shifter"
+    ]
+  },
+  "dynamics_chain": {
+    "label": "Dynamics Chain",
+    "nodes": [
+      "Parametric EQ",
+      "Noise Reduction",
+      "Soft Clipping",
+      "Compression",
+      "Limiter",
+      "Gate"
+    ]
+  },
+  "bridges_only": {
+    "label": "Bridges",
+    "nodes": [
+      "Signal Bridge",
+      "Signal Bridge Input",
+      "Signal Bridge Output",
+      "Channel Signal Bridge"
+    ]
+  },
+  "ai_route": {
+    "label": "AI Route",
+    "nodes": [
+      "Signal Bridge",
+      "Signal Bridge Input",
+      "AI PROCESSING",
+      "Signal Bridge Output"
+    ]
+  },
+  "core_managers": {
+    "label": "Core Managers",
+    "nodes": [
+      "SIGNAL MANAGER",
+      "Signal Input",
+      "Signal Bridge",
+      "EFFECTS SIGNAL MANAGER",
+      "Master Control",
+      "MODULE MANAGER",
+      "CHANNEL EFFECTS MANAGER"
+    ]
+  },
+  "io_only": {
+    "label": "I/O Only",
+    "nodes": [
+      "AUDIO INPUT",
+      "Signal Input",
+      "Signal Output",
+      "Output Main",
+      "AUDIO OUTPUT"
+    ]
+  },
+  "reverb_focus": {
+    "label": "Reverb Focus",
+    "nodes": [
+      "Channel Signal Bridge",
+      "Reverb",
+      "Reverb Input",
+      "Reverb Output",
+      "Reverb Parameter Control",
+      "Reverb Processing",
+      "Reverb Wet/Dry Mix"
+    ]
+  },
+  "delay_focus": {
+    "label": "Delay Focus",
+    "nodes": [
+      "Channel Signal Bridge",
+      "Delay",
+      "Delay Input",
+      "Delay Output",
+      "Delay Parameter Control",
+      "Delay Processing",
+      "Delay Wet/Dry Mix"
+    ]
+  }
+}

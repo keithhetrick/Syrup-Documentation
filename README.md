@@ -85,6 +85,7 @@ window.syrupSignalFlow.previewAudioPath("Reverb");
 
 - Run locally: `python3 -m http.server 8000` → open `http://localhost:8000`.
 - See `build-playbook.md` for turning this into a JUCE/AudioProcessorGraph plugin (engine wiring, RT safety, parameter schema, style guide).
+- Use `preset-helper.js` (console importable) to validate/serialize preset JSON (`examplePresetFile` provided).
 
 ## What this repo demonstrates (role-aligned)
 
