@@ -284,24 +284,12 @@ if (!container) {
       });
     }
 
-    // Save position when node is dragged
-    network.on('dragEnd', function(params) {
-      if (params.nodes.length > 0) {
-        const nodeId = params.nodes[0];
-        const position = network.getPositions([nodeId])[nodeId];
-        if (position) {
-          positionStore.save(nodeId, position);
-          console.log(`Node ${nodeId} position saved:`, position);
-        }
-      }
-    });
-
-    // Visual feedback during drag
+    // Drag-and-drop with visual feedback and position persistence
     let draggedNode = null;
+    
     network.on('dragStart', function(params) {
       if (params.nodes.length > 0) {
         draggedNode = params.nodes[0];
-        const node = nodesDS.get(draggedNode);
         nodesDS.update({
           id: draggedNode,
           borderWidth: 4,
@@ -311,17 +299,28 @@ if (!container) {
     });
 
     network.on('dragEnd', function(params) {
-      // Restore normal appearance after drag
-      if (draggedNode) {
-        const node = nodeData.find(n => n.id === draggedNode);
-        if (node) {
-          nodesDS.update({
-            id: draggedNode,
-            borderWidth: 1,
-            shadow: { enabled: true, size: 6 }
-          });
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        
+        // Save position to sessionStorage
+        const position = network.getPositions([nodeId])[nodeId];
+        if (position) {
+          positionStore.save(nodeId, position);
+          console.log(`Node ${nodeId} position saved:`, position);
         }
-        draggedNode = null;
+        
+        // Restore normal appearance after drag
+        if (draggedNode) {
+          const node = nodeData.find(n => n.id === draggedNode);
+          if (node) {
+            nodesDS.update({
+              id: draggedNode,
+              borderWidth: 1,
+              shadow: { enabled: true, size: 6 }
+            });
+          }
+          draggedNode = null;
+        }
       }
     });
 
