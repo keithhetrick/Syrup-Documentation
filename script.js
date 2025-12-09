@@ -7,6 +7,10 @@ import {
   modes,
   legendIcons,
   HIGHLIGHT_DURATION_MS,
+  userPresets,
+  addUserPreset,
+  removeUserPreset,
+  getAllPresets,
 } from "./config.js";
 
 // normalize data with ids for vis.js selection APIs
@@ -17,6 +21,9 @@ const descriptions = {
   "EFFECTS SIGNAL MANAGER": "Routes into master control and module manager.",
   "Master Control": "Global wet/dry and top-level macro control.",
   "MODULE MANAGER": "Dynamics chain hub (comp/limiter/gate).",
+  "Parametric EQ": "Multi-band parametric equalizer for frequency shaping.",
+  "Noise Reduction": "Intelligent noise reduction for signal cleanup.",
+  "Soft Clipping": "Soft saturation and clipping for warmth and ceiling control.",
   Compression: "Dynamics processor for level control.",
   Limiter: "Ceiling protection to prevent clipping.",
   Gate: "Noise gate/expander for cleanup.",
@@ -35,6 +42,9 @@ const describeNode = (node) =>
 // Optional richer metadata for tooltips
 const nodeMeta = {
   "Master Control": { latency: "0.3ms", params: "Wet/Dry, Macro", role: "Global mix" },
+  "Parametric EQ": { latency: "0.2ms", params: "Frequency, Q, Gain (multi-band)", role: "EQ/Tone" },
+  "Noise Reduction": { latency: "1.5ms", params: "Threshold, Reduction, Attack/Release", role: "Cleanup" },
+  "Soft Clipping": { latency: "~0ms", params: "Threshold, Knee, Drive", role: "Saturation/Limit" },
   "Compression": { latency: "1.0ms", params: "Threshold, Ratio, Attack/Release", role: "Dynamics" },
   "Limiter": { latency: "0.8ms", params: "Ceiling, Lookahead", role: "Ceiling" },
   "Gate": { latency: "0.5ms", params: "Threshold, Range, Hold/Release", role: "Noise cleanup" },
@@ -335,6 +345,10 @@ if (!container) {
         collapsibleGroups,
         modes,
         legendIcons,
+        userPresets,
+        addUserPreset,
+        removeUserPreset,
+        getAllPresets,
       },
       container
     );
