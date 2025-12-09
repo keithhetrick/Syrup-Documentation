@@ -310,8 +310,19 @@ if (!container) {
       }
     });
 
-    network.on('dragging', function(params) {
-      // Could add real-time position display here
+    network.on('dragEnd', function(params) {
+      // Restore normal appearance after drag
+      if (draggedNode) {
+        const node = nodeData.find(n => n.id === draggedNode);
+        if (node) {
+          nodesDS.update({
+            id: draggedNode,
+            borderWidth: 1,
+            shadow: { enabled: true, size: 6 }
+          });
+        }
+        draggedNode = null;
+      }
     });
 
     // Mini-map overview for quick navigation (static, no interaction).
@@ -515,12 +526,22 @@ if (!container) {
         const node = nodeData.find(n => n.id === nodeId);
         if (!node) return null;
         
-        // Find path from input to this node
+        // Find path from input to this node with circular reference protection
         const path = [];
+        const visited = new Set();
         let current = node;
-        while (current) {
+        const maxIterations = 100; // Safety limit
+        let iterations = 0;
+        
+        while (current && iterations < maxIterations) {
+          if (visited.has(current.id)) {
+            console.warn('Circular reference detected in node path');
+            break;
+          }
+          visited.add(current.id);
           path.unshift(current.id);
           current = nodeData.find(n => n.id === current.parentId);
+          iterations++;
         }
         
         // Calculate latency for this path
