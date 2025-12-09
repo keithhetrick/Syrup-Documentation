@@ -18,10 +18,21 @@ export const presets = {
   // Dry path from template
   dryPath: presetTemplates.dryPath,
   
-  // New presets from master branch - using dynamic generation
-  cleaningChain: generatePreset("Cleaning Chain", [], true), // Just dynamics modules, no channel effects
-  fullDynamicsChain: generatePreset("Full Dynamics Chain", [], true), // Full dynamics processing
-  masteringChain: generatePreset("Mastering Chain", [], true), // Mastering-focused chain
+  // New presets from master branch - using dynamic generation with different module combinations
+  cleaningChain: generatePreset("Cleaning Chain", [], { 
+    includeDynamics: true, 
+    includeCompression: false  // Only dynamics modules (EQ, Noise Reduction, Soft Clipping)
+  }),
+  fullDynamicsChain: generatePreset("Full Dynamics Chain", [], { 
+    includeDynamics: true, 
+    includeCompression: true  // All 6 modules (dynamics + compression)
+  }),
+  masteringChain: generatePreset("Mastering Chain", [], { 
+    includeDynamics: true,
+    dynamicsModules: ["Parametric EQ", "Soft Clipping"],  // Selective dynamics
+    includeCompression: true,
+    compressionModules: ["Compression", "Limiter"]  // No Gate for mastering
+  }),
 };
 
 // User-created presets - dynamically managed (from master branch)

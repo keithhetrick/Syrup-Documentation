@@ -184,7 +184,14 @@ export const edges = [...baseEdges, ...effectEdges].map((edge) => ({
 }));
 
 // Dynamic preset generator - creates signal chain presets based on effect combinations
-export function generatePreset(label, effectCombinations = [], includeDynamics = true) {
+export function generatePreset(label, effectCombinations = [], options = {}) {
+  const {
+    includeDynamics = true,
+    dynamicsModules = dynamicsModulesList,
+    includeCompression = true,
+    compressionModules = ["Compression", "Limiter", "Gate"]
+  } = options;
+  
   const baseChain = [
     "AUDIO INPUT",
     "SIGNAL MANAGER",
@@ -197,12 +204,12 @@ export function generatePreset(label, effectCombinations = [], includeDynamics =
   ];
 
   // Add dynamics modules if requested (default: true)
-  const dynamicsChain = includeDynamics ? dynamicsModulesList : [];
+  const dynamicsChain = includeDynamics ? dynamicsModules : [];
   
-  const compressionChain = [
-    "Compression",
-    "Limiter",
-    "Gate",
+  // Add compression chain if requested (default: true)
+  const compressionChain = includeCompression ? compressionModules : [];
+  
+  const channelChain = [
     "CHANNEL EFFECTS MANAGER",
     "Channel Signal Bridge",
   ];
@@ -216,7 +223,7 @@ export function generatePreset(label, effectCombinations = [], includeDynamics =
   // Build the full chain with selected effects
   return {
     label,
-    nodes: [...baseChain, ...dynamicsChain, ...compressionChain, ...effectCombinations, ...outputChain],
+    nodes: [...baseChain, ...dynamicsChain, ...compressionChain, ...channelChain, ...effectCombinations, ...outputChain],
   };
 }
 
