@@ -178,7 +178,24 @@ const effectEdges = [...channelEffects, ...dynamicsModules].flatMap((node) => {
   return [];
 });
 
-export const edges = [...baseEdges, ...effectEdges].map((edge) => ({
+// Auto edges for dynamics modules
+const dynamicsEdges = dynamicsModules.flatMap((node) => {
+  const id = node.id;
+  if (id.endsWith(" Input")) {
+    const fx = id.replace(" Input", "");
+    return [
+      { from: fx, to: id },
+      { from: id, to: `${fx} Parameter Control` },
+      { from: `${fx} Parameter Control`, to: `${fx} Processing` },
+      { from: `${fx} Processing`, to: `${fx} Wet/Dry Mix` },
+      { from: `${fx} Wet/Dry Mix`, to: `${fx} Output`, dashes: true },
+      { from: `${fx} Output`, to: fx, dashes: true },
+    ];
+  }
+  return [];
+});
+
+export const edges = [...baseEdges, ...effectEdges, ...dynamicsEdges].map((edge) => ({
   id: edgeId(edge.from, edge.to),
   ...edge,
 }));
