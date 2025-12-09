@@ -90,50 +90,55 @@ const channelEffects = ["Reverb", "Delay", "Saturation", "Pitch Shifter"].flatMa
 );
 
 export const nodes = [...rootNodes, ...channelEffects];
+export const channelEffectsList = ["Reverb", "Delay", "Saturation", "Pitch Shifter"];
 
-// Core edges
+// Core edges - optimized to reduce redundancy
+// Removed redundant dashed paths for cleaner graph visualization
 const baseEdges = [
+  // Forward signal flow
   { from: "AUDIO INPUT", to: "SIGNAL MANAGER" },
   { from: "SIGNAL MANAGER", to: "Signal Input" },
-  { from: "Signal Output", to: "SIGNAL MANAGER", dashes: true },
   { from: "Signal Input", to: "Signal Bridge" },
   { from: "Signal Bridge", to: "Signal Bridge Input" },
-  { from: "Signal Bridge", to: "Signal Output", dashes: true },
-  { from: "Signal Bridge Output", to: "Signal Bridge", dashes: true },
   { from: "Signal Bridge Input", to: "EFFECTS SIGNAL MANAGER" },
   { from: "Signal Bridge", to: "AI PROCESSING" },
-  { from: "EFFECTS SIGNAL MANAGER", to: "Signal Bridge Output", dashes: true },
+  { from: "EFFECTS SIGNAL MANAGER", to: "Effects Signal Manager Input" },
+  { from: "Effects Signal Manager Input", to: "Master Control" },
+  { from: "Master Control", to: "Master Control Input" },
+  { from: "Master Control Input", to: "Master Control Parameter Control" },
+  { from: "Master Control Parameter Control", to: "Master Control Processing" },
+  { from: "Master Control Processing", to: "Master Control Wet/Dry Mix" },
+  { from: "Master Control Wet/Dry Mix", to: "MODULE MANAGER" },
   { from: "MODULE MANAGER", to: "Module Manager Input" },
   { from: "Module Manager Input", to: "Compression" },
-  { from: "Module Manager Output", to: "MODULE MANAGER", dashes: true },
   { from: "Compression", to: "Limiter" },
   { from: "Limiter", to: "Gate" },
   { from: "Gate", to: "CHANNEL EFFECTS MANAGER" },
-  { from: "AI PROCESSING", to: "Signal Bridge", dashes: true },
-  { from: "EFFECTS SIGNAL MANAGER", to: "Effects Signal Manager Input" },
-  { from: "CHANNEL EFFECTS MANAGER", to: "Module Manager Output", dashes: true },
-  { from: "Effects Signal Manager Output", to: "EFFECTS SIGNAL MANAGER", dashes: true },
-  { from: "Effects Signal Manager Input", to: "Master Control" },
-  { from: "Master Control", to: "Effects Signal Manager Output", dashes: true },
   { from: "CHANNEL EFFECTS MANAGER", to: "Channel Effects Input" },
-  { from: "Channel Effects Output", to: "CHANNEL EFFECTS MANAGER", dashes: true },
   { from: "Channel Effects Input", to: "Channel Signal Bridge" },
   { from: "Channel Signal Bridge", to: "Reverb" },
   { from: "Channel Signal Bridge", to: "Delay" },
   { from: "Channel Signal Bridge", to: "Saturation" },
   { from: "Channel Signal Bridge", to: "Pitch Shifter" },
-  { from: "Channel Signal Bridge", to: "Channel Effects Output", dashes: true },
+  
+  // Return paths (dashed) - consolidated and simplified
+  { from: "AI PROCESSING", to: "Signal Bridge", dashes: true },
   { from: "Reverb", to: "Channel Signal Bridge", dashes: true },
   { from: "Delay", to: "Channel Signal Bridge", dashes: true },
   { from: "Saturation", to: "Channel Signal Bridge", dashes: true },
   { from: "Pitch Shifter", to: "Channel Signal Bridge", dashes: true },
-  { from: "Master Control", to: "Master Control Input" },
-  { from: "Master Control Output", to: "Master Control", dashes: true },
-  { from: "Master Control Input", to: "Master Control Parameter Control" },
-  { from: "Master Control Parameter Control", to: "Master Control Processing" },
-  { from: "Master Control Processing", to: "Master Control Wet/Dry Mix" },
-  { from: "Master Control Wet/Dry Mix", to: "MODULE MANAGER" },
+  { from: "Channel Signal Bridge", to: "Channel Effects Output", dashes: true },
+  { from: "Channel Effects Output", to: "CHANNEL EFFECTS MANAGER", dashes: true },
+  { from: "CHANNEL EFFECTS MANAGER", to: "Module Manager Output", dashes: true },
+  { from: "Module Manager Output", to: "MODULE MANAGER", dashes: true },
   { from: "MODULE MANAGER", to: "Master Control Output", dashes: true },
+  { from: "Master Control Output", to: "Master Control", dashes: true },
+  { from: "Master Control", to: "Effects Signal Manager Output", dashes: true },
+  { from: "Effects Signal Manager Output", to: "EFFECTS SIGNAL MANAGER", dashes: true },
+  { from: "EFFECTS SIGNAL MANAGER", to: "Signal Bridge Output", dashes: true },
+  { from: "Signal Bridge Output", to: "Signal Bridge", dashes: true },
+  { from: "Signal Bridge", to: "Signal Output", dashes: true },
+  { from: "Signal Output", to: "SIGNAL MANAGER", dashes: true },
   { from: "SIGNAL MANAGER", to: "Output Main", dashes: true },
   { from: "Output Main", to: "AUDIO OUTPUT", dashes: true },
 ];
@@ -159,3 +164,51 @@ export const edges = [...baseEdges, ...effectEdges].map((edge) => ({
   id: edgeId(edge.from, edge.to),
   ...edge,
 }));
+
+// Dynamic preset generator - creates signal chain presets based on effect combinations
+export function generatePreset(label, effectCombinations = []) {
+  const baseChain = [
+    "AUDIO INPUT",
+    "SIGNAL MANAGER",
+    "Signal Input",
+    "Signal Bridge",
+    "EFFECTS SIGNAL MANAGER",
+    "Effects Signal Manager Input",
+    "Master Control",
+    "MODULE MANAGER",
+    "Compression",
+    "Limiter",
+    "Gate",
+    "CHANNEL EFFECTS MANAGER",
+    "Channel Signal Bridge",
+  ];
+
+  const outputChain = [
+    "Signal Bridge Output",
+    "Output Main",
+    "AUDIO OUTPUT",
+  ];
+
+  // Build the full chain with selected effects
+  return {
+    label,
+    nodes: [...baseChain, ...effectCombinations, ...outputChain],
+  };
+}
+
+// Template for path presets using available effects
+export const presetTemplates = {
+  dryPath: {
+    label: "Dry Path",
+    nodes: [
+      "AUDIO INPUT",
+      "SIGNAL MANAGER",
+      "Signal Input",
+      "Signal Bridge",
+      "Signal Bridge Output",
+      "Signal Output",
+      "Output Main",
+      "AUDIO OUTPUT",
+    ],
+  },
+};

@@ -1,93 +1,22 @@
 // Central configuration for the Syrup signal flow presentation.
+import { generatePreset, presetTemplates, channelEffectsList } from "./data.js";
+
 export const HIGHLIGHT_DURATION_MS = 5000;
 
+// Dynamically generate presets based on data.js templates
+// This reduces hardcoded configurations and allows flexible signal path creation
 export const presets = {
   audioPath: { label: "Highlight Audio Path", nodes: null }, // BFS-driven
-  chainA: {
-    label: "A/B: Chain A",
-    nodes: [
-      "AUDIO INPUT",
-      "SIGNAL MANAGER",
-      "Signal Input",
-      "Signal Bridge",
-      "EFFECTS SIGNAL MANAGER",
-      "Effects Signal Manager Input",
-      "Master Control",
-      "MODULE MANAGER",
-      "Compression",
-      "Limiter",
-      "Gate",
-      "CHANNEL EFFECTS MANAGER",
-      "Channel Signal Bridge",
-      "Reverb",
-      "Delay",
-      "Signal Bridge Output",
-      "Output Main",
-      "AUDIO OUTPUT",
-    ],
-  },
-  chainB: {
-    label: "A/B: Chain B",
-    nodes: [
-      "AUDIO INPUT",
-      "SIGNAL MANAGER",
-      "Signal Input",
-      "Signal Bridge",
-      "EFFECTS SIGNAL MANAGER",
-      "Effects Signal Manager Input",
-      "Master Control",
-      "MODULE MANAGER",
-      "Compression",
-      "Limiter",
-      "Gate",
-      "CHANNEL EFFECTS MANAGER",
-      "Channel Signal Bridge",
-      "Saturation",
-      "Pitch Shifter",
-      "Signal Bridge Output",
-      "Output Main",
-      "AUDIO OUTPUT",
-    ],
-  },
-  fxChainA: {
-    label: "FX Chain A",
-    nodes: [
-      "AUDIO INPUT",
-      "SIGNAL MANAGER",
-      "Signal Input",
-      "Signal Bridge",
-      "EFFECTS SIGNAL MANAGER",
-      "Effects Signal Manager Input",
-      "Master Control",
-      "MODULE MANAGER",
-      "Compression",
-      "Limiter",
-      "Gate",
-      "CHANNEL EFFECTS MANAGER",
-      "Channel Signal Bridge",
-      "Reverb",
-      "Delay",
-      "Saturation",
-      "Pitch Shifter",
-      "Channel Signal Bridge",
-      "Signal Bridge Output",
-      "Output Main",
-      "AUDIO OUTPUT",
-    ],
-  },
-  dryPath: {
-    label: "Dry Path",
-    nodes: [
-      "AUDIO INPUT",
-      "SIGNAL MANAGER",
-      "Signal Input",
-      "Signal Bridge",
-      "Signal Bridge Output",
-      "Signal Output",
-      "Output Main",
-      "AUDIO OUTPUT",
-    ],
-  },
+  
+  // A/B Chains using dynamic generation with different effect combinations
+  chainA: generatePreset("A/B: Chain A", ["Reverb", "Delay"]),
+  chainB: generatePreset("A/B: Chain B", ["Saturation", "Pitch Shifter"]),
+  
+  // Full FX chain with all effects
+  fxChainA: generatePreset("FX Chain A", channelEffectsList),
+  
+  // Dry path from template
+  dryPath: presetTemplates.dryPath,
 };
 
 export const collapsibleGroups = {
