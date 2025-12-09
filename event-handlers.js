@@ -354,6 +354,7 @@ export function setupEventListeners(
       graphContainer.classList.add("waveform-active");
       // Add visual indicator for active waveform mode
       // Use processing effect nodes from data.js
+      // Filter nodes by ID (processingNodesList contains node IDs)
       const activeNodes = getActiveNodes().filter(n => processingNodesList.includes(n.id));
       
       activeNodes.forEach(node => {

@@ -527,7 +527,7 @@ if (!container) {
         
         // Find path from input to this node with circular reference protection
         // Note: This uses parentId which represents hierarchical structure, not signal flow.
-        // For signal flow paths, consider using edge-based path finding with getAudioPath()
+        // For edge-based signal flow paths, use helper-functions.js getAudioPath() instead
         const path = [];
         const visited = new Set();
         let current = node;
