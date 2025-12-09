@@ -10,6 +10,14 @@
 
 "Syrup" is a versatile audio effects plugin designed for music production and sound design, combining traditional effects with innovative AI-driven, vocal harmony, and granular synthesis features.
 
+## Whitepaper Abstract
+
+- **Goal**: Production-ready, modular audio processor with explicit audio/control routing, template-driven graph, and RT-safe UI/engine separation.
+- **Architecture**: Nodes/edges defined as data templates; built into an `AudioProcessorGraph` with typed buses and edition/feature-flag gating. Controllers dispatch commands (presets/modes/tours) against immutable templates; UI is a thin view.
+- **AI layer**: Off-audio-thread feature extraction (LUFS, crest, spectral tilt, transient density) feeding a lightweight recommender that scores existing chains/parameter presets; applied via controller to keep RT safety.
+- **UX**: Guided tours, presets/A-B, collapsible groups, responsive controls/drawers, deterministic layouts for visual QA; single source of truth for main graph and mini-map.
+- **Ops/QA**: Stable IDs for visual diffs, PNG export for baselines, data-only module delivery, and template validation to prevent collisions. RT discipline: no graph mutation on audio thread; lock-free parameter writes.
+
 ### Objectives
 
 - To provide a comprehensive plugin for enhancing audio tracks with a range of effects.
@@ -59,7 +67,7 @@
 
 #### AI Integration
 
-- **AI-Powered Recommendations**: Suggests optimal effects chains based on the audio, including granular synthesis settings.
+- **AI-Powered Recommendations**: Suggests optimal effects chains and parameter presets based on input signal analysis, including granular synthesis settings (template scoring/recommender). Implementation: extract light-weight features (LUFS, crest factor, spectral tilt, transient density) off the audio thread, score existing templates with a small model/ruleset, and apply the winning preset via the controller. Inference runs on the message thread; audio thread remains RT-safe.
 - **Signal-Aware Guidance**: Integrates with the UI guided tour to surface suggested paths and module highlights.
 
 #### Vocal Harmony Feature
@@ -136,3 +144,14 @@
 - Compliance with relevant software standards and copyright laws.
 
 ---
+
+## Implementation Blueprint (turning this into a shipping plugin)
+
+- **Engine graph**: Model each node here as an `AudioProcessorGraph::Node` (or equivalent) with explicit audio vs control buses. Managers/bridges become routers; dynamics live under Module Manager; channel FX remain isolated. Keep return paths typed and sparse to avoid feedback.
+- **Routing contracts**: Define a `NodeTemplate` struct (id, role, latency, params, parentId) and `EdgeTemplate` (from, to, type: audio/control/return). Generate graph wiring from these templates at startup—no hardcoded IDs in code.
+- **Module API**: Expose a factory for processors: `std::unique_ptr<AudioProcessor> makeProcessor(const NodeTemplate&)`. New modules ship as data + factory registration. Edition/feature flags gate which templates load.
+- **Presets/modes**: Treat presets as command objects that flip visibility/params and trigger a fit/reset. Store them as JSON alongside templates; keep user presets in a writable store. A/B compare = two preset recipes with quick toggle.
+- **Control surface**: Map UI commands (tour, preset, mode, collapse) to an abstract controller that updates the graph and notifies the view. Avoid UI-driven graph mutation; route everything through the controller.
+- **Real-time safety**: Keep graph mutations off the audio thread; schedule node/edge changes via message thread, then swap in an updated graph atomically. Keep DSP parameter changes lock-free (atomics or AudioProcessorParameter).
+- **State/persistence**: Serialize node positions (if exposed) and presets separately from audio state; keep audio parameters in the processor state tree (JUCE ValueTree or equivalent).
+- **Observability**: Log command handlers (preset/mode/tour), path latency calculations, and export-to-PNG/test artifacts for QA. Stable IDs support visual diffs and telemetry joins.

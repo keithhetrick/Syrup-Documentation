@@ -34,6 +34,32 @@ export function setupEventListeners(
   );
   const { applyFocus, resetFocus, scheduleClear, clearSelectionAndFocus } =
     createFocusController(network, nodesDS, edgesDS);
+  const getControlPanels = () =>
+    Array.from(controlsContainer?.querySelectorAll("details") || []);
+  const positionDrawer = (panel) => {
+    // Drawer positions relative to its summary; CSS handles overlay.
+    return panel;
+  };
+  const closeControlDrawer = (collapsePanels = true) => {
+    getControlPanels().forEach((panel) => {
+      panel.classList.remove("drawer");
+      if (collapsePanels) {
+        panel.open = false;
+      }
+    });
+  };
+  const openControlDrawer = (panel) => {
+    if (!panel) return;
+    getControlPanels().forEach((other) => {
+      if (other !== panel) {
+        other.open = false;
+        other.classList.remove("drawer");
+      }
+    });
+    panel.open = true;
+    panel.classList.add("drawer");
+    positionDrawer(panel);
+  };
   const tourPointer =
     (graphContainer && graphContainer.querySelector(".tour-pointer")) ||
     (() => {
@@ -54,24 +80,72 @@ export function setupEventListeners(
       return el;
     })();
 
-  // Utility: create grouped button sections so the control bar stays organized.
+  // Cache/restore styles so guided tour can dim non-active nodes cleanly.
+  let tourOriginalNodeColors = null;
+  let tourOriginalEdgeColors = null;
+
+  // Utility: create grouped button sections so the control bar stays organized; each button acts as a command handler over the graph data.
   const addButton = (label, onClick, groupId = "default") => {
-    let group = controlsContainer.querySelector(`[data-group="${groupId}"]`);
-    if (!group) {
-      group = document.createElement("div");
+    let detailsWrapper = controlsContainer.querySelector(
+      `details[data-group="${groupId}"]`
+    );
+    if (!detailsWrapper) {
+      detailsWrapper = document.createElement("details");
+      detailsWrapper.dataset.group = groupId;
+      detailsWrapper.open = false;
+      const summary = document.createElement("summary");
+      summary.textContent = groupId;
+      detailsWrapper.appendChild(summary);
+      const group = document.createElement("div");
       group.className = "control-group";
-        group.dataset.group = groupId;
-        const header = document.createElement("div");
-        header.className = "control-group-title";
-        header.textContent = groupId;
-        group.appendChild(header);
-        controlsContainer.appendChild(group);
+      detailsWrapper.appendChild(group);
+      controlsContainer.appendChild(detailsWrapper);
+    }
+    const group = detailsWrapper.querySelector(".control-group");
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.addEventListener("click", onClick);
+    group.appendChild(btn);
+  };
+
+  if (controlsContainer) {
+    controlsContainer.addEventListener("click", (event) => {
+      if (event.detail > 1) return; // let double-click handler take over
+      const summary = event.target.closest("summary");
+      if (!summary) return;
+      const panel = summary.parentElement;
+      if (!panel || panel.tagName.toLowerCase() !== "details") return;
+
+      event.preventDefault(); // take over toggle to avoid reflow
+      const alreadyOpen = panel.classList.contains("drawer");
+      closeControlDrawer();
+      if (!alreadyOpen) {
+        panel.open = true;
+        openControlDrawer(panel);
+      } else {
+        panel.open = false;
       }
-      const btn = document.createElement("button");
-      btn.textContent = label;
-      btn.addEventListener("click", onClick);
-      group.appendChild(btn);
-    };
+    });
+    controlsContainer.addEventListener("dblclick", (event) => {
+      const summary = event.target.closest("summary");
+      if (!summary) return;
+      const panel = summary.parentElement;
+      if (!panel || panel.tagName.toLowerCase() !== "details") return;
+      event.preventDefault();
+      const isOpen = panel.classList.contains("drawer");
+      closeControlDrawer();
+      panel.open = !isOpen;
+      if (!isOpen) openControlDrawer(panel);
+    });
+    controlsContainer.addEventListener("scroll", () => {
+      const openPanel = controlsContainer.querySelector("details.drawer");
+      if (openPanel) positionDrawer(openPanel);
+    });
+  }
+  window.addEventListener("resize", () => {
+    const openPanel = controlsContainer?.querySelector("details.drawer");
+    if (openPanel) positionDrawer(openPanel);
+  });
 
   const getActiveNodes = () => nodesDS.get();
   const getActiveEdges = () => edgesDS.get();
@@ -106,13 +180,7 @@ export function setupEventListeners(
     tourPointer.textContent = text || "";
     tourPointer.style.display = "block";
 
-    if (miniPointer && lookups.miniNetwork) {
-      const miniPos = lookups.miniNetwork.canvasToDOM(avg);
-      miniPointer.style.left = `${miniPos.x}px`;
-      miniPointer.style.top = `${miniPos.y}px`;
-      miniPointer.textContent = text ? "•" : " ";
-      miniPointer.style.display = "block";
-    }
+    // Mini-map pointer disabled per UX feedback; keep main pointer only.
   };
 
   const selectPath = (pathIds) => {
@@ -128,6 +196,78 @@ export function setupEventListeners(
       network.selectEdges(pathEdgeIds);
     }
     applyFocus(getActiveNodes(), getActiveEdges(), pathIds, pathEdgeIds);
+  };
+
+  const cacheTourStyles = () => {
+    if (!tourOriginalNodeColors) {
+      tourOriginalNodeColors = new Map();
+      getActiveNodes().forEach((n) => tourOriginalNodeColors.set(n.id, n.color));
+    }
+    if (!tourOriginalEdgeColors) {
+      tourOriginalEdgeColors = new Map();
+      getActiveEdges().forEach((e) => tourOriginalEdgeColors.set(e.id, e.color));
+    }
+  };
+
+  const restoreTourStyles = () => {
+    if (tourOriginalNodeColors) {
+      nodesDS.update(
+        Array.from(tourOriginalNodeColors.entries()).map(([id, color]) => ({
+          id,
+          color,
+        }))
+      );
+    }
+    if (tourOriginalEdgeColors) {
+      edgesDS.update(
+        Array.from(tourOriginalEdgeColors.entries()).map(([id, color]) => ({
+          id,
+          color,
+        }))
+      );
+    }
+    tourOriginalNodeColors = null;
+    tourOriginalEdgeColors = null;
+  };
+
+  const dimGraphForTour = (activeIds = []) => {
+    const activeSet = new Set(activeIds);
+    const activeEdges = getActiveEdges();
+    const pathEdgeIds = activeEdges
+      .filter((edge) => activeSet.has(edge.from) && activeSet.has(edge.to))
+      .map((edge) => edge.id);
+
+    const nodeUpdates = getActiveNodes().map((node) => {
+      const baseColor = tourOriginalNodeColors?.get(node.id) || node.color;
+      const dimColor = {
+        background: "rgba(180, 180, 180, 0.22)",
+        border: "rgba(120, 120, 120, 0.45)",
+        highlight: { border: "#ff9500", background: "#ffe7c2" },
+        hover: { border: "#ffb84d", background: "#fff2d9" },
+      };
+      return {
+        id: node.id,
+        color: activeSet.has(node.id) ? baseColor : dimColor,
+      };
+    });
+
+    const edgeUpdates = activeEdges.map((edge) => {
+      const baseColor =
+        tourOriginalEdgeColors?.get(edge.id) ||
+        edge.color || { color: "#8c8c8c", highlight: "#ff9500", hover: "#ffb84d" };
+      const dimEdgeColor = {
+        color: "rgba(130, 130, 130, 0.25)",
+        highlight: "#ff9500",
+        hover: "#ffb84d",
+      };
+      return {
+        id: edge.id,
+        color: pathEdgeIds.includes(edge.id) ? baseColor : dimEdgeColor,
+      };
+    });
+
+    nodesDS.update(nodeUpdates);
+    edgesDS.update(edgeUpdates);
   };
 
   // Event listener for highlighting the path of a selected node
@@ -286,7 +426,7 @@ export function setupEventListeners(
           tourTimer = null;
         }
         clearSelectionAndFocus(getActiveNodes(), getActiveEdges());
-        if (lookups.miniNetwork) lookups.miniNetwork.unselectAll();
+        restoreTourStyles();
         positionPointer();
       };
 
@@ -296,8 +436,9 @@ export function setupEventListeners(
           return;
         }
         const { ids, text } = steps[idx];
+        cacheTourStyles();
         selectPath(ids);
-        if (lookups.miniNetwork) lookups.miniNetwork.selectNodes(ids, true);
+        dimGraphForTour(ids);
         positionPointer(ids, text);
         idx += 1;
         tourTimer = setTimeout(runStep, 3600);
@@ -461,6 +602,7 @@ export function setupEventListeners(
       clearSelectionAndFocus(getActiveNodes(), getActiveEdges());
     } else if (e.key === "Escape") {
       document.body.classList.remove("sidebar-open");
+      closeControlDrawer();
     }
   });
 
@@ -523,7 +665,7 @@ export function setupEventListeners(
 
 function renderLegend(nodes, container, legendIcons) {
   if (!container) return;
-  container.innerHTML = "<h3>Legend</h3>";
+  container.innerHTML = "";
   const seen = new Set();
   nodes.forEach((node) => {
     if (seen.has(node.group)) return;
@@ -589,5 +731,8 @@ function renderNarrative() {
     <h3>Architecture Story</h3>
     <p>Audio enters via <strong>Signal Manager</strong>, passes through <strong>Master Control</strong> and the <strong>Module Manager</strong> for dynamics, then the <strong>Channel Effects Manager</strong> fans out into time/pitch/color modules before rejoining the bridge to the main output.</p>
     <p>Each node owns a single responsibility and never crosses into another node’s role—concerns stay localized and the modular architecture stays de-coupled. Guided tours, A/B presets, collapsible modules, and mode switches demonstrate the complex control surface and UX iteration for both architect and end-user views.</p>
+    <p><strong>Routing patterns:</strong> Managers enforce predictable ingress/egress while bridges isolate domains. Returns are dashed to surface non-linear routes. Dynamics live under the Module Manager so channel FX can be swapped without disturbing level governance.</p>
+    <p><strong>Resilience:</strong> Physics is disabled after stabilization to avoid jitter; reset and zoom controls restore safe defaults; all paths derive from a single source of truth for nodes/edges to keep the mini-map and main graph synchronized.</p>
+    <p><strong>UX cues:</strong> Bands hint at phases, presets highlight canonical paths, and toggleable groups let you trim the view for a focused story—useful for design reviews or end-user onboarding.</p>
   `;
 }

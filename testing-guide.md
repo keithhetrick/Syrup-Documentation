@@ -198,5 +198,18 @@ Tested on:
 If you encounter any issues:
 1. Check browser console for errors
 2. Verify JavaScript files loaded correctly
+
+---
+
+## Plugin integration test plan (real-world)
+
+- **DAW smoke**: Load VST3/AU/AAX in Reaper/Logic/Pro Tools; instantiate, bypass, automate wet/dry; confirm no CPU spikes or denorm issues.
+- **Graph integrity**: Build `AudioProcessorGraph` from templates; assert unique node/edge IDs; verify audio/control buses connect as per data; ensure return paths are opt-in and bounded.
+- **Preset fidelity**: Load shipped presets; assert node visibility and parameter sets match JSON; round-trip user presets to disk and reload.
+- **Mode/edition gating**: Toggle Architect/End-user modes; confirm hidden nodes stay silent and disconnected; feature flags remove nodes/edges cleanly.
+- **Latency reporting**: Compare calculated path latency against processor `getLatencySamples()`; fail tests if drift exceeds threshold.
+- **State save/restore**: Serialize processor state; reload session and confirm node layout (if persisted), parameter values, and preset selection restore identically.
+- **Concurrency/RT-safe**: Stress-test control changes while processing audio; ensure graph mutations occur off audio thread with lock-free parameter writes.
+- **UI parity**: Keyboard shortcuts mirror UI commands; guided tour dims non-path nodes; dropdown/drawer behavior consistent on desktop/mobile; export PNG produces stable layout for visual diffing.
 3. Confirm vis-network library loaded from CDN
 4. Check that sessionStorage is enabled in browser

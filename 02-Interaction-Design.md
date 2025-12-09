@@ -14,10 +14,15 @@
 - **Interaction**: Click-and-drag to increase/decrease values. Hovering shows current value.
 - **Feedback**: Knob/slider moves smoothly with mouse drag; value changes are reflected in real-time on the UI.
 - **A/B Context**: When A/B compare is active, knob changes are visually scoped to the active chain.
+- **Parameter schema**: Each control maps to a parameter definition with:
+  - `id` (string, stable), `label` (UI copy), `unit` (e.g., dB, ms, %), `range` (min/max), `default`, `taper` (linear/log), `step` (optional).
+  - Flags: `modulatable` (bool), `automationId` (host-facing name), `group` (e.g., Dynamics, Time, Color), `context` (Architect/End-user visibility).
+  - Binding: UI reads from parameter store; writes go through a controller to the engine parameter (e.g., JUCE `AudioProcessorParameter`), supporting host automation.
 
 ### AI Mode Button
 
-- **Function**: Activates AI-based effect recommendations.
+- **Function**: Activates AI-based effect recommendations (e.g., suggests chains and parameter presets based on input signal analysis—implemented via a recommender that scores templates).
+- **Implementation**: AI runs off the audio thread: feature extraction (LUFS, crest, spectral tilt) → score templates → dispatch winning preset as a command; UI shows the selected preset, not arbitrary mutation.
 - **Interaction**: Click to toggle AI mode.
 - **Feedback**: Button illuminates or changes color when active; an overlay or sidebar appears with suggestions.
 
@@ -44,6 +49,7 @@
 - **Function**: Steps through the signal path with timed highlights.
 - **Interaction**: Click to start; auto-advances with in-graph and mini-map pointers.
 - **Feedback**: Pointers follow the active nodes; selection and focus animate per step; double-click or reset clears tour.
+- **Implementation**: Tour is a sequenced command queue; cache/restore node/edge styles, dim non-path nodes, and drive both main/minimap selections from the same dataset.
 
 ### A/B Compare Buttons
 
@@ -81,6 +87,12 @@
 - **Keyboard**: `D` toggles theme, `R` resets view; ESC closes mobile sidebar; double-click clears highlights.
 - **Edge Semantics**: Audio/control/return edges use distinct labels/colors to reinforce flow semantics.
 - **Modularity**: Each node represents a single responsibility; interactions never cross module boundaries, reinforcing a de-coupled model.
+- **Implementation notes**:
+  - Treat UI buttons as command handlers; they call into a controller that updates graph state (vis network or JUCE Component graph) and pushes fit/reset as needed.
+  - Keep datasets single-sourced: main graph, mini-map, and presets all read the same node/edge store to avoid drift.
+  - On desktop/mobile, use overlays/drawers for controls; ensure ESC/overlay click cancels; summary double-click toggles dropdowns.
+  - Respect `prefers-reduced-motion` by skipping non-essential animations; keyboard shortcuts must mirror UI actions for parity.
+  - Component tree: Sidebar (Legend, Narrative, Mini-map) + Main (Controls panel, Controls help, Network canvas). Control groups: Navigation, Modes, Presets, A/B Compare, Views, Modules, Interactivity, Theme, User Presets.
 
 ---
 

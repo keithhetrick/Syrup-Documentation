@@ -2,36 +2,54 @@
 <html>
   <head>
     <title>Modular Signal Flow Overview</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <!-- Build/playbook: see build-playbook.md for offline asset wiring and engine integration -->
     <script
       type="text/javascript"
       src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
     ></script>
   </head>
   <body>
-    <button id="hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <button id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      ☰
+    </button>
     <div id="sidebar-overlay"></div>
     <h1 id="main-title">"Syrup" Audio Plugin - Modular Signal Flow Overview</h1>
 
     <div id="layout">
       <aside id="sidebar">
-        <section id="legend"></section>
-        <section id="narrative"></section>
-        <section id="overview">
-          <h3>Mini-map</h3>
-          <div id="mini-map"></div>
-        </section>
+        <details id="legend-panel" open>
+          <summary>Legend</summary>
+          <section id="legend"></section>
+        </details>
+        <details id="narrative-panel">
+          <summary>Story</summary>
+          <section id="narrative"></section>
+        </details>
+        <details id="overview-panel" open>
+          <summary>Mini-map</summary>
+          <section id="overview">
+            <div id="mini-map"></div>
+          </section>
+        </details>
       </aside>
       <main id="main">
-        <div id="controls"></div>
+        <details id="controls-panel" open>
+          <summary>Controls</summary>
+          <div id="controls"></div>
+        </details>
         <div id="controls-help" aria-label="Presenter tips">?</div>
-        <div id="mynetwork" class="banded" data-band-label="Signal Flow Canvas"></div>
+        <div
+          id="mynetwork"
+          class="banded"
+          data-band-label="Signal Flow Canvas"
+        ></div>
       </main>
     </div>
 
