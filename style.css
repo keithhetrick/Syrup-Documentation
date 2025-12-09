@@ -468,15 +468,6 @@ button:active {
 }
 
 /* Waveform animation effects for processing nodes */
-@keyframes waveform-pulse {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(255, 149, 0, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
-  }
-}
-
 @keyframes latency-indicator {
   0% {
     opacity: 0.4;

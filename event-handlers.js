@@ -7,7 +7,7 @@ import {
   // setChannelStripOptions,
 } from "./helper-functions.js";
 import { HIGHLIGHT_DURATION_MS, legendIcons } from "./config.js";
-import { channelEffectsList } from "./data.js";
+import { processingNodesList } from "./data.js";
 import { createFocusController, createHideController } from "./ui-helpers.js";
 
 const edgeTypeStyles = {
@@ -354,8 +354,7 @@ export function setupEventListeners(
       graphContainer.classList.add("waveform-active");
       // Add visual indicator for active waveform mode
       // Use processing effect nodes from data.js
-      const processingNodes = ["Compression", "Limiter", "Gate", ...channelEffectsList];
-      const activeNodes = getActiveNodes().filter(n => processingNodes.includes(n.id));
+      const activeNodes = getActiveNodes().filter(n => processingNodesList.includes(n.id));
       
       activeNodes.forEach(node => {
         nodesDS.update({

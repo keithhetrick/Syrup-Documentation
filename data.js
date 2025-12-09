@@ -92,6 +92,9 @@ const channelEffects = ["Reverb", "Delay", "Saturation", "Pitch Shifter"].flatMa
 export const nodes = [...rootNodes, ...channelEffects];
 export const channelEffectsList = ["Reverb", "Delay", "Saturation", "Pitch Shifter"];
 
+// Processing nodes for visual effects and animations
+export const processingNodesList = ["Compression", "Limiter", "Gate", ...channelEffectsList];
+
 // Core edges - optimized to reduce redundancy
 // Removed redundant dashed paths for cleaner graph visualization
 const baseEdges = [
