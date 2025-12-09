@@ -196,7 +196,7 @@ export function setupEventListeners(
     }
     
     // Re-render user presets
-    Object.entries(config.userPresets || {}).forEach(([, preset]) => {
+    Object.values(config.userPresets || {}).forEach((preset) => {
       addButton(
         preset.label,
         () => {
@@ -219,7 +219,16 @@ export function setupEventListeners(
     const presetName = prompt("Enter a name for this preset:");
     if (!presetName) return;
     
-    const presetKey = presetName.replace(/\s+/g, "_").toLowerCase();
+    // Generate unique key with timestamp to avoid conflicts
+    const baseKey = presetName.replace(/\s+/g, "_").toLowerCase();
+    let presetKey = baseKey;
+    let counter = 1;
+    
+    // Check for existing keys and append counter if needed
+    while (config.userPresets[presetKey]) {
+      presetKey = `${baseKey}_${counter}`;
+      counter++;
+    }
     
     try {
       config.addUserPreset(presetKey, presetName, selectedNodes);
