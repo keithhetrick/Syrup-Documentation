@@ -85,13 +85,23 @@ const effectTemplate = (name, levelBase) => [
   createNode(`${name} Wet/Dry Mix`, `${name} Wet/Dry Mix`, levelBase + 3, "control", `${name} Input`),
 ];
 
+// Dynamics template parented to MODULE MANAGER
+const dynamicsTemplate = (name, levelBase) => [
+  createNode(name, name, levelBase, "process", "MODULE MANAGER"),
+  createNode(`${name} Input`, `${name} Input`, levelBase + 1, "io", name),
+  createNode(`${name} Output`, `${name} Output`, levelBase + 1, "io", name),
+  createNode(`${name} Parameter Control`, `${name} Parameter Control`, levelBase + 3, "control", `${name} Input`),
+  createNode(`${name} Processing`, `${name} Processing`, levelBase + 3, "control", `${name} Input`),
+  createNode(`${name} Wet/Dry Mix`, `${name} Wet/Dry Mix`, levelBase + 3, "control", `${name} Input`),
+];
+
 const channelEffects = ["Reverb", "Delay", "Saturation", "Pitch Shifter"].flatMap((fx) =>
   effectTemplate(fx, 17)
 );
 
 // New industry-standard signal processing modules (from master branch)
 const dynamicsModules = ["Parametric EQ", "Noise Reduction", "Soft Clipping"].flatMap((fx) =>
-  effectTemplate(fx, 12)
+  dynamicsTemplate(fx, 12)
 );
 
 export const nodes = [...rootNodes, ...channelEffects, ...dynamicsModules];
@@ -195,7 +205,18 @@ const dynamicsEdges = dynamicsModules.flatMap((node) => {
   return [];
 });
 
-export const edges = [...baseEdges, ...effectEdges, ...dynamicsEdges].map((edge) => ({
+// Deduplicate edges by from/to to avoid vis DataSet collisions
+function dedupeEdges(arr) {
+  const seen = new Set();
+  return arr.filter((edge) => {
+    const id = edgeId(edge.from, edge.to);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+export const edges = dedupeEdges([...baseEdges, ...effectEdges, ...dynamicsEdges]).map((edge) => ({
   id: edgeId(edge.from, edge.to),
   ...edge,
 }));

@@ -481,10 +481,7 @@ export function setupEventListeners(
     () => {
       resetData("architect");
       clearHidden(getActiveNodes(), getActiveEdges());
-      setTimeout(() => {
-        resetFocus(getActiveNodes(), getActiveEdges());
-        network.fit({ animation: true });
-      }, 50);
+      setTimeout(() => resetFocus(getActiveNodes(), getActiveEdges()), 50);
       clearSelectionAndFocus(getActiveNodes(), getActiveEdges());
     },
     "Modes"
@@ -494,10 +491,7 @@ export function setupEventListeners(
     () => {
       resetData("endUser");
       clearHidden(getActiveNodes(), getActiveEdges());
-      setTimeout(() => {
-        resetFocus(getActiveNodes(), getActiveEdges());
-        network.fit({ animation: true });
-      }, 50);
+      setTimeout(() => resetFocus(getActiveNodes(), getActiveEdges()), 50);
       clearSelectionAndFocus(getActiveNodes(), getActiveEdges());
     },
     "Modes"
